@@ -22,7 +22,8 @@ fato_avaliacoes
 ├── data_avaliacao        date               -- relaciona com a tabela calendário do Power BI
 ├── nota                  smallint           -- medida
 ├── sentimento            varchar            -- "Positivo"/"Negativo"/"Neutro" (gerado no Silver, via ML)
-└── confianca_sentimento  decimal            -- score do modelo de ML
+├── confianca_sentimento  decimal            -- score do modelo de ML
+└── natureza_registro     varchar            -- "Sintético"/"Real" (ver ADR-003)
 ```
 
 **Comentário (texto) fica fora do Gold.** Texto livre não é medida analítica e
@@ -30,6 +31,15 @@ infla o modelo sem necessidade — Power BI não precisa carregar o texto de cad
 avaliação para gerar KPI, gráfico ou card. O comentário permanece disponível
 na camada Silver, caso seja necessário um relatório de drill-through pontual
 no futuro.
+
+**`natureza_registro` fica como atributo direto do fato, não como dimensão
+separada.** Cardinalidade de 2 valores (`Sintético`/`Real`, ver
+[ADR 003](decisions/003-natureza-registro-sintetico-real.md)) não justifica
+uma `dim_natureza_dado` — mesmo raciocínio já aplicado a não criar dimensão
+para `sentimento`. Serve como slicer no Power BI para alternar entre "ver
+tudo", "só dado real" ou "só dado de demonstração" (útil tanto durante o
+desenvolvimento do projeto quanto para deixar explícito, na apresentação do
+portfólio, o que é simulação).
 
 ## Dimensões
 

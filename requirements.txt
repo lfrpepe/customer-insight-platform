@@ -1,0 +1,7 @@
+# Único driver PostgreSQL do projeto — usado tanto localmente (scripts de
+# seed) quanto no Databricks (ver ADR-001 e ADR-005). Python puro, sem
+# compilação/dependência de pg_config no sistema operacional.
+pg8000==1.31.2
+
+python-dotenv==1.0.1
+Faker==26.0.0

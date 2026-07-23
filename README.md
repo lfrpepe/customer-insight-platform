@@ -22,9 +22,25 @@ evolutiva (permite crescer em funcionalidades sem reestruturação).
 | Banco operacional (OLTP) | PostgreSQL (Supabase) | Armazena dados brutos de origem |
 | Engenharia de Dados | Databricks Free Edition + Apache Spark | ETL, Bronze/Silver/Gold, Machine Learning |
 | Backend / Cadastro | Flask | CRUD de avaliações com validações |
-| Ingestão | Web Scraping + APIs Públicas | Múltiplas fontes de dados |
+| Ingestão | Web Scraping + Pinpad + Totem + Telemarketing + APIs Públicas | Múltiplas fontes de dados, com níveis de estrutura diferentes |
 | BI | Power BI | Dashboards executivos sobre a camada Gold |
 | Versionamento | GitHub + GitHub Actions | Código, documentação, automação |
+
+## Fontes de avaliação
+
+O projeto simula 4 canais distintos de captura, cada um com um grau diferente
+de estrutura — o que é proposital, para demonstrar modelagem de dados capaz
+de lidar com dado estruturado e não estruturado ao mesmo tempo:
+
+| Origem | Cliente identificado | Categoria | Texto livre |
+|---|:---:|:---:|:---:|
+| Formulário Web (Flask) | ✅ | ✅ | opcional |
+| Pinpad - Atendente | ❌ | ✅ (fixa por atendimento) | ❌ |
+| Totem - Autoatendimento | ❌ | ❌ | ❌ |
+| Telemarketing - Pesquisa Pós-Atendimento | ✅ | ✅ | ❌ |
+| Web Scraping | ❌ | ❌ | ✅ |
+
+Detalhamento em [`docs/data_model_relational.md`](docs/data_model_relational.md).
 
 ## Arquitetura
 
@@ -32,7 +48,7 @@ Ver detalhes completos em [`docs/architecture.md`](docs/architecture.md).
 
 Resumo:
 ```
-Fontes de Dados (Scraping, Formulário, API)
+Fontes de Dados (Scraping, Formulário, Pinpad, Totem, Telemarketing, API)
         ↓
 PostgreSQL / Supabase  (Banco Operacional — OLTP)
         ↓
