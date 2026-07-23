@@ -1,8 +1,8 @@
 # Status do Projeto — Customer Insight Platform
 
 **Última atualização:** 2026-07-23
-**Fase atual:** 0 — Fundação → **Concluída**
-**Próxima fase:** 1 — Modelagem de Dados
+**Fase atual:** 1 — Modelagem de Dados → **Concluída**
+**Próxima fase:** 2 — Estrutura do Repositório / Banco de Dados (implementação)
 
 ## Ambiente configurado
 
@@ -35,6 +35,32 @@
 - Free tier do Supabase pausa após 7 dias de inatividade (dados preservados, sem
   backup automático). Decisão: aceitar pausa manual por enquanto; heartbeat via
   GitHub Actions fica para a Fase 2 (Qualidade e Automação), se necessário.
+
+## Fase 1 — Modelagem de Dados
+
+- [x] Modelo relacional definido (Clientes, Avaliações, Categorias, Origem,
+  Cidade, Estado) — ver `docs/data_model_relational.md`
+- [x] Script DDL de criação de schema — `src/database/scripts/schema.sql`
+- [x] Rascunho inicial do modelo dimensional (Gold) — ver `docs/data_model_dimensional.md`
+
+### Decisões de modelagem confirmadas
+
+- Escala de nota: 1 a 5 (CHECK constraint)
+- `id_cidade` em Clientes é opcional — resolvido via API (ViaCEP) a partir do CEP
+- `comentario` em Avaliações é opcional — nem todo dado de scraping traz texto
+- Sem constraint de deduplicação de avaliações no Postgres — responsabilidade
+  da camada Silver (Databricks)
+
+### Nota para a Fase de Ingestão (ainda não implementada)
+
+Os dados fictícios devem simular clientes recorrentes, não um cliente novo por
+avaliação. Estratégia definida: gerar um pool fixo de clientes fictícios
+(ex. 200-500 registros) e, ao simular avaliações (scraping/geração), sortear
+clientes existentes desse pool — idealmente com distribuição não uniforme
+(poucos clientes concentrando a maioria das avaliações), para refletir o
+padrão real de uma base de atendimento. Isso preserva o valor analítico de
+`id_cliente` como chave estável (histórico por cliente, detecção de clientes
+recorrentemente insatisfeitos etc.).
 
 ## Riscos monitorados
 
