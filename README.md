@@ -21,7 +21,7 @@ evolutiva (permite crescer em funcionalidades sem reestruturação).
 |---|---|---|
 | Banco operacional (OLTP) | PostgreSQL (Supabase) | Armazena dados brutos de origem |
 | Engenharia de Dados | Databricks Free Edition + Apache Spark | ETL, Bronze/Silver/Gold, Machine Learning |
-| Backend / Cadastro | Flask | CRUD de avaliações com validações |
+| Backend / Cadastro | FastAPI | Cadastro de avaliações com validações — apenas *Create* (ver [ADR 006](docs/decisions/006-fastapi-em-vez-de-flask.md)) |
 | Ingestão | Web Scraping + Pinpad + Totem + Telemarketing + APIs Públicas | Múltiplas fontes de dados, com níveis de estrutura diferentes |
 | BI | Power BI | Dashboards executivos sobre a camada Gold |
 | Versionamento | GitHub + GitHub Actions | Código, documentação, automação |
@@ -34,7 +34,7 @@ de lidar com dado estruturado e não estruturado ao mesmo tempo:
 
 | Origem | Cliente identificado | Categoria | Texto livre |
 |---|:---:|:---:|:---:|
-| Formulário Web (Flask) | ✅ | ✅ | opcional |
+| Formulário Web (FastAPI) | ✅ | ✅ | opcional |
 | Pinpad - Atendente | ❌ | ✅ (fixa por atendimento) | ❌ |
 | Totem - Autoatendimento | ❌ | ❌ | ❌ |
 | Telemarketing - Pesquisa Pós-Atendimento | ✅ | ✅ | ❌ |

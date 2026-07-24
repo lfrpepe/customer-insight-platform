@@ -26,6 +26,14 @@ fato_avaliacoes
 └── natureza_registro     varchar            -- "Sintético"/"Real" (ver ADR-003)
 ```
 
+**`sentimento` e `confianca_sentimento` são nulos para a maioria das
+origens.** A análise de sentimento depende de texto livre, que só existe em
+`Formulário Web` (opcional) e `Scraping` (sempre) — `Pinpad`, `Totem` e
+`Telemarketing` não capturam comentário (ver tabela de preenchimento por
+origem em [`data_model_relational.md`](data_model_relational.md)). Medidas
+DAX de sentimento devem, portanto, filtrar por origem ou tratar o nulo
+explicitamente, em vez de assumir cobertura total da base.
+
 **Comentário (texto) fica fora do Gold.** Texto livre não é medida analítica e
 infla o modelo sem necessidade — Power BI não precisa carregar o texto de cada
 avaliação para gerar KPI, gráfico ou card. O comentário permanece disponível

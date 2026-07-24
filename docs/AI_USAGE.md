@@ -74,6 +74,12 @@ implementação, engenharia de dados e documentação.
   comportamentos que eram esperados por design (IDs não sequenciais desde 1
   por causa de sequências não-transacionais do Postgres, `id_cidade` nulo
   por design, e exibição em UTC de colunas `TIMESTAMPTZ`).
+- **Auditoria de consistência da documentação** — varredura final
+  cruzando schema, script de carga e todos os documentos: validou as regras
+  de negócio das 5 origens por teste automatizado (zero violações),
+  identificou e corrigiu numeração de fases divergente nos ADRs, um ADR sem
+  referência cruzada, arquivos obsoletos remanescentes e uma lacuna não
+  documentada (cobertura parcial da análise de sentimento entre origens).
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada

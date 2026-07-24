@@ -10,7 +10,7 @@ tratados e preparados para consumo).
 ```
 Fontes de Dados
    ├── Web Scraping (avaliações públicas — dado não estruturado: nota + comentário)
-   ├── Sistema Web / Flask (CRUD de avaliações — dado estruturado completo)
+   ├── Sistema Web / FastAPI (cadastro de avaliações, apenas Create — dado estruturado completo)
    ├── Pinpad - Atendente (nota ao final de um atendimento — sem cliente, com categoria)
    ├── Totem - Autoatendimento (nota espontânea do cliente — sem cliente, sem categoria)
    ├── Telemarketing - Pesquisa Pós-Atendimento (nota por IVR — cliente e categoria conhecidos, sem comentário)
@@ -50,7 +50,7 @@ com níveis de estrutura diferentes:
 
 | Origem                     | Cliente | Categoria | Comentário | O que é possível analisar |
 |-----------------------------|:-------:|:---------:|:----------:|-----------------------------|
-| Formulário Web (Flask)       | ✅      | ✅        | opcional   | Histórico por cliente, recorrência, sentimento |
+| Formulário Web (FastAPI)      | ✅      | ✅        | opcional   | Histórico por cliente, recorrência, sentimento |
 | Pinpad - Atendente            | ❌      | ✅ (fixa por guichê) | ❌ | Nota por categoria/atendimento, sem rastrear cliente |
 | Totem - Autoatendimento       | ❌      | ❌        | ❌         | Nota geral por origem/período |
 | Telemarketing - Pesquisa Pós-Atendimento | ✅ | ✅ | ❌ | Histórico por cliente e recorrência (ver [ADR 004](decisions/004-origem-telemarketing.md)), sem sentimento (sem texto) |
@@ -69,13 +69,14 @@ cada origem sem gerar `(Blank)` no Power BI — ver
 ## Pinpad e Totem: interface
 
 Ambos são interfaces de captura minimalista (poucos cliques, sem
-autenticação de cliente), a serem desenvolvidas na **Fase 5 — Backend**,
-junto com o sistema Flask. A tecnologia (Streamlit standalone vs. rota
-dedicada no mesmo Flask) ainda não foi definida — decisão a ser tomada na
-Fase 5, não antecipada aqui.
+autenticação de cliente), desenvolvidas na **Fase 5 — Backend**, junto com
+o sistema principal. A tecnologia foi definida como **rota dedicada no
+mesmo FastAPI** (não um app Streamlit separado) — ver
+[ADR 006](decisions/006-fastapi-em-vez-de-flask.md), que também documenta a
+troca de Flask por FastAPI como framework de backend.
 
 Ambos gravam diretamente na tabela `avaliacoes`, reaproveitando o mesmo
-módulo `database/connection.py` do Flask — não é um serviço separado com
+módulo `database/connection.py` do backend — não é um serviço separado com
 banco próprio.
 
 ## Por que Postgres não é a camada Bronze
@@ -101,9 +102,9 @@ data lake", que são conceitos e responsabilidades diferentes.
 ### Banco Operacional — PostgreSQL (Supabase)
 
 Responsável por armazenar todos os dados brutos gerados pelas fontes
-(cadastro via Flask, pinpad, totem, resultado do scraping, enriquecimento via
-API). Modelado com integridade referencial completa, com FKs opcionais onde a
-origem estruturalmente não produz aquele dado (ver seção acima).
+(cadastro via FastAPI, pinpad, totem, resultado do scraping, enriquecimento
+via API). Modelado com integridade referencial completa, com FKs opcionais
+onde a origem estruturalmente não produz aquele dado (ver seção acima).
 
 Conexão: Session Pooler (porta 5432, compatível com IPv4) — ver
 [ADR 001](decisions/001-driver-postgres-databricks-serverless.md) para a

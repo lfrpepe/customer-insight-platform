@@ -2,7 +2,7 @@
 
 **Status:** Aceito
 **Data:** 2026-07-23
-**Fase:** 1 — Modelagem de Dados
+**Fase:** 2 — Modelagem de Dados
 
 ## Contexto
 

@@ -2,7 +2,7 @@
 
 **Status:** Aceito
 **Data:** 2026-07-23
-**Fase:** 2 — Estrutura do Repositório / Banco de Dados
+**Fase:** 4 — Banco de Dados
 
 ## Contexto
 

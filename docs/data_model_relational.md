@@ -250,3 +250,6 @@ Decisão de rastreabilidade dado sintético vs. real (`natureza_registro`):
 
 Decisão da 5ª origem de avaliação (Telemarketing):
 [ADR 004](decisions/004-origem-telemarketing.md).
+
+Driver PostgreSQL usado pelos scripts de carga (`pg8000`):
+[ADR 005](decisions/005-driver-postgres-scripts-locais.md).

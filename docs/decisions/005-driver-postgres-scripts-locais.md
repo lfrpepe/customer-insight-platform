@@ -1,8 +1,10 @@
-# ADR 005 — `psycopg2-binary` para scripts locais (vs. `pg8000` no Databricks)
+# ADR 005 — Driver PostgreSQL para scripts locais
 
-**Status:** Aceito
+**Status:** Revisado — a proposta inicial (`psycopg2-binary`) foi revertida
+no mesmo dia; **decisão vigente: `pg8000` em todo o projeto** (ver seção
+"Atualização" ao final)
 **Data:** 2026-07-23
-**Fase:** 2 — Banco de Dados
+**Fase:** 4 — Banco de Dados
 
 ## Contexto
 
