@@ -7,7 +7,7 @@
 ## Objetivo
 
 Modelar o banco operacional responsável por armazenar os dados brutos gerados
-pelas fontes do projeto (cadastro via Flask, pinpad de atendente, totem de
+pelas fontes do projeto (cadastro via FastAPI, pinpad de atendente, totem de
 autoatendimento, resultado do scraping, dados enriquecidos via API), com
 integridade referencial completa. Este banco **não** é a camada Bronze — ver
 justificativa em [`architecture.md`](architecture.md).
@@ -86,7 +86,7 @@ Linhas (seed inicial):
 
 | nome                      | Descrição                                                        |
 |---------------------------|-------------------------------------------------------------------|
-| `Formulário Web`          | Cadastro via sistema Flask — dado mais completo                    |
+| `Formulário Web`          | Cadastro via sistema FastAPI — dado mais completo                  |
 | `Pinpad - Atendente`      | Nota registrada pelo atendente ao final de um atendimento           |
 | `Totem - Autoatendimento` | Nota registrada pelo próprio cliente, sem amarração a atendimento   |
 | `Scraping`                | Avaliação pública coletada de sites de review                      |
@@ -123,7 +123,7 @@ Decisões confirmadas na Fase 2 (Modelagem de Dados):
   estável para histórico e detecção de recorrência.
 - **`natureza_registro` (Fase 4 — Banco de Dados, ver [ADR 003](decisions/003-natureza-registro-sintetico-real.md)):**
   distingue dado gerado pelo seed de desenvolvimento (`'Sintético'`) de dado
-  capturado pelos sistemas reais — Flask, Pinpad, Totem, Scraper
+  capturado pelos sistemas reais — FastAPI, Pinpad, Totem, Scraper
   (`'Real'`, default). Necessário porque os dois tipos de registro coexistem
   na mesma tabela ao longo do desenvolvimento.
 
@@ -145,9 +145,9 @@ Decisões confirmadas na Fase 2 (Modelagem de Dados):
 
 - **Escala de nota fixa em 1–5**, garantida por `CHECK` no banco (não só na
   aplicação) — é a regra mais barata de impor na origem e evita dado inválido
-  entrar mesmo por uma via de ingestão futura que pule a validação do Flask
-  (ex.: script de carga direto). É o único campo garantido em **todas** as
-  origens, inclusive pinpad e totem.
+  entrar mesmo por uma via de ingestão futura que pule a validação do
+  FastAPI (ex.: script de carga direto). É o único campo garantido em
+  **todas** as origens, inclusive pinpad e totem.
 - **`id_cliente` e `id_categoria` opcionais (`NULL`, não sentinela):** cada
   origem entrega um subconjunto diferente de campos, por natureza da fonte —
   não é dado faltando por falha, é a fonte que estruturalmente não produz
@@ -167,7 +167,7 @@ Decisões confirmadas na Fase 2 (Modelagem de Dados):
   ingestão fiel da origem.
 - **`natureza_registro` (Fase 4 — Banco de Dados, ver [ADR 003](decisions/003-natureza-registro-sintetico-real.md)):**
   distingue dado gerado pelo seed de desenvolvimento (`'Sintético'`) de dado
-  capturado pelos sistemas reais — Flask, Pinpad, Totem, Scraper, Telemarketing
+  capturado pelos sistemas reais — FastAPI, Pinpad, Totem, Scraper, Telemarketing
   (`'Real'`, default). Ortogonal a `id_origem`: uma avaliação de `Scraping`
   pode ser `Sintético` hoje (seed) e `Real` quando o scraper de fato rodar.
 
@@ -176,7 +176,7 @@ Decisões confirmadas na Fase 2 (Modelagem de Dados):
 | Origem                    | id_cliente | id_categoria | comentario | nota        |
 |----------------------------|:----------:|:------------:|:----------:|:-----------:|
 | `Formulário Web`           | conhecido  | conhecida    | opcional   | obrigatória |
-| `Pinpad - Atendente`       | `NULL`     | **conhecida** (fixa por guichê/atendimento) | `NULL` | obrigatória |
+| `Pinpad - Atendente`       | `NULL`     | **conhecida** (selecionada pelo operador no atendimento presencial em caixa) | `NULL` | obrigatória |
 | `Totem - Autoatendimento`  | `NULL`     | `NULL` (sem amarração a local ou atendimento) | `NULL` | obrigatória |
 | `Scraping`                 | `NULL`     | `NULL`       | conhecido  | obrigatória |
 | `Telemarketing - Pesquisa Pós-Atendimento` | conhecido | conhecida | `NULL` (IVR só captura o dígito) | obrigatória |

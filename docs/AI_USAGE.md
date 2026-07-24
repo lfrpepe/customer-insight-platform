@@ -74,12 +74,26 @@ implementação, engenharia de dados e documentação.
   comportamentos que eram esperados por design (IDs não sequenciais desde 1
   por causa de sequências não-transacionais do Postgres, `id_cidade` nulo
   por design, e exibição em UTC de colunas `TIMESTAMPTZ`).
-- **Auditoria de consistência da documentação** — varredura final
-  cruzando schema, script de carga e todos os documentos: validou as regras
-  de negócio das 5 origens por teste automatizado (zero violações),
-  identificou e corrigiu numeração de fases divergente nos ADRs, um ADR sem
-  referência cruzada, arquivos obsoletos remanescentes e uma lacuna não
-  documentada (cobertura parcial da análise de sentimento entre origens).
+- **Avaliação técnica de troca de framework antes de codar** — ao iniciar a
+  Fase 5, foi levantada a possibilidade de usar FastAPI em vez do Flask
+  originalmente planejado (Fase 1), por indicação de mercado; a IA avaliou
+  o trade-off tecnicamente (validação via Pydantic, documentação automática,
+  viabilidade de servir formulários HTML) antes de confirmar a mudança,
+  registrada em [ADR 006](decisions/006-fastapi-em-vez-de-flask.md), com
+  atualização de todos os documentos que citavam Flask.
+- **Geração dos módulos de backend da Fase 5** (FastAPI) — `connection.py`
+  (conexão pg8000 generalizada a partir do padrão do seed), `crud/avaliacoes.py`
+  (ponto único de escrita, parametrizado por origem), validador de CPF,
+  4 schemas Pydantic e 4 routers (um por origem: Formulário Web, Pinpad,
+  Totem, Telemarketing) mais `main.py`.
+- **Correção do mecanismo de categoria do Pinpad** — a IA havia assumido um
+  mapeamento fixo guichê→categoria (`config/settings.py`) como placeholder;
+  o usuário esclareceu que a categoria do atendimento presencial em caixa é
+  selecionada pelo próprio operador, não fixa por guichê (não há múltiplos
+  guichês com categorias distintas no projeto). Corrigido: schema/router do
+  Pinpad passaram a receber `categoria` diretamente (igual ao Formulário
+  Web), `config/settings.py` foi removido, e a descrição do Pinpad em
+  `data_model_relational.md` foi ajustada para refletir a regra real.
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada

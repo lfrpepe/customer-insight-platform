@@ -3,7 +3,7 @@
 **Última atualização:** 2026-07-24
 **Fases concluídas:** 1 (Arquitetura), 2 (Modelagem de Dados), 3 (Estrutura
 do Repositório), 4 (Banco de Dados)
-**Próxima fase:** 5 — Backend (Flask, Pinpad/Totem, integração Telemarketing)
+**Próxima fase:** 5 — Backend (FastAPI, Pinpad/Totem, integração Telemarketing)
 
 > Nota sobre numeração: as seções abaixo agrupam os passos 1-2 (Arquitetura
 > + Modelagem de Dados) e 3-4 (Estrutura do Repositório + Banco de Dados)
@@ -34,7 +34,7 @@ do Repositório), 4 (Banco de Dados)
   diferente.
 - **ADR 003** — Coluna `natureza_registro` (`'Sintético'`/`'Real'`) em
   `clientes` e `avaliacoes`, para distinguir dado gerado pelo seed de
-  desenvolvimento de dado capturado pelos sistemas reais (Flask, Pinpad,
+  desenvolvimento de dado capturado pelos sistemas reais (FastAPI, Pinpad,
   Totem, Telemarketing, Scraper).
 - **ADR 004** — Nova origem de avaliação `Telemarketing - Pesquisa
   Pós-Atendimento` (IVR pós-ligação): cliente e categoria conhecidos, sem
@@ -44,6 +44,12 @@ do Repositório), 4 (Banco de Dados)
   (exigia compilação + `pg_config`, ausente no sistema). Decisão final:
   `pg8000` (Python puro, sem compilação) em todo o projeto — local e
   Databricks, um único driver.
+- **ADR 006** — FastAPI (não Flask) como framework de backend da Fase 5,
+  para cadastro de avaliações (Formulário Web), Pinpad/Totem (rota
+  dedicada, não Streamlit standalone) e integração Telemarketing. Motivos:
+  validação nativa via Pydantic, documentação automática (OpenAPI/Swagger)
+  e maior demanda de mercado — sem perda funcional para o escopo do
+  projeto.
 
 ## Decisões de ambiente (não formalizadas como ADR, mas relevantes)
 
@@ -183,8 +189,8 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
     (armazena em UTC por padrão; conversão para horário local é
     responsabilidade da camada de consumo — documentado em
     `data_model_relational.md`)
-- [ ] Definição da tecnologia de interface do Pinpad/Totem (Streamlit
-  standalone vs. rota Flask minimalista) — decisão adiada para a Fase 5
+- [x] Definição da tecnologia de interface do Pinpad/Totem: **rota
+  dedicada no mesmo FastAPI** (não Streamlit standalone) — ver ADR-006
 
 ## Riscos monitorados
 
@@ -198,8 +204,23 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
 
 ## Próximos passos (Fase 5 — Backend)
 
-- CRUD Flask para avaliações (Formulário Web)
-- Interface única de Pinpad/Totem, com seleção de modo
-- Integração com sistema de Telemarketing (pesquisa pós-atendimento)
-- Definir tecnologia da interface Pinpad/Totem (Streamlit standalone vs.
-  rota Flask minimalista — decisão adiada desde a Fase 3-4)
+- [x] Framework de backend definido: **FastAPI** (não Flask) — ver ADR-006
+- [x] Tecnologia da interface Pinpad/Totem definida: rota dedicada no mesmo
+  FastAPI (não Streamlit standalone) — ver ADR-006
+- [x] Escopo do Formulário Web definido: **apenas Create** (cadastro de
+  avaliação), sem tela administrativa de edição/exclusão — confirmado
+  explicitamente pelo autor
+- [x] Deploy definido: apenas local/GitHub Codespaces por ora, sem
+  publicação em free tier nesta fase
+- [x] Cadastro (Create) via FastAPI para avaliações (Formulário Web)
+- [x] Módulos de backend implementados: `src/database/connection.py`,
+  `src/validators/cliente.py`, `src/crud/avaliacoes.py`, `src/schemas/`
+  (4 schemas Pydantic, um por origem), `src/api/` (4 routers + `main.py`)
+- [x] Correção: Pinpad **não** usa mapeamento fixo de guichê→categoria —
+  é atendimento presencial único em caixa, o operador seleciona a
+  categoria diretamente (mesmo mecanismo do Formulário Web). `config/
+  settings.py` (guichê) foi removido; `data_model_relational.md` corrigido.
+- [ ] Templates HTML (Jinja2) para Formulário Web, Pinpad e Totem — rotas
+  já existem, faltam as telas
+- [ ] Interface de Pinpad/Totem, com seleção de modo
+- [ ] Integração com sistema de Telemarketing (pesquisa pós-atendimento)
