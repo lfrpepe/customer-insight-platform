@@ -1,7 +1,7 @@
 # Status do Projeto — Customer Insight Platform
 
 **Última atualização:** 2026-07-23
-**Fase atual:** 2 — Estrutura do Repositório / Banco de Dados → **Em andamento**
+**Fase atual:** 2 — Estrutura do Repositório / Banco de Dados → **Concluída**
 **Próxima fase:** 5 — Backend (Flask, Pinpad/Totem, integração Telemarketing)
 
 ## Ambiente configurado
@@ -50,6 +50,21 @@
 - Free tier do Supabase pausa após 7 dias de inatividade (dados preservados, sem
   backup automático). Decisão: aceitar pausa manual por enquanto; heartbeat via
   GitHub Actions fica para a Fase 2 (Qualidade e Automação), se necessário.
+- **Confirmado:** a rede corporativa do autor bloqueia ativamente a porta
+  5432 (Postgres) para conexões de saída — testado com `Test-NetConnection`
+  (`TcpTestSucceeded: False`), não é problema de driver/script. GitHub
+  Codespaces deixa de ser "opção principal" e passa a ser **necessário**
+  para qualquer script que precise de conexão direta ao banco a partir da
+  máquina de trabalho.
+- Confirmado (2026-07-24): com a Data API desabilitada, o Supabase não
+  desliga o PostgREST internamente — ele passa a usar um schema sentinela
+  inexistente (`pg_pgrst_no_exposed_schemas`), gerando o erro `schema
+  "pg_pgrst_no_exposed_schemas" does not exist` nos logs. Confirmado pela
+  [documentação oficial de troubleshooting do
+  Supabase](https://supabase.com/docs/guides/troubleshooting/schema-pg_pgrst_no_exposed_schemas-does-not-exist):
+  é comportamento esperado, não afeta o projeto (não interfere na conexão
+  direta via `pg8000`, que não passa pelo PostgREST) — apenas ruído nos
+  logs. Nenhuma ação necessária.
 
 ## Fase 1 — Modelagem de Dados (Concluída)
 
@@ -128,8 +143,36 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
 - [x] `generate_seed_dev.py` migrado de `psycopg2` para `pg8000` após falha
   de instalação (`psycopg2-binary` exigia compilar extensão C + `pg_config`
   ausente no Windows do autor) — ver atualização no ADR-005
-- [ ] Rodar o script localmente e validar a carga no Supabase — pendente de
-  execução pelo usuário
+- [x] **Bug corrigido:** primeira execução via Codespaces completou sem
+  erro aparente (todos os inserts e contagens corretas), mas faltava
+  `conn.commit()` explícito — `pg8000` tem `autocommit=False` por padrão e
+  `close()` não comita a transação, então os dados provavelmente não foram
+  persistidos de fato. Corrigido: commit explícito ao final, rollback em
+  caso de exceção, conexão fechada uma única vez (antes havia fechamento
+  duplicado, causando o erro `connection is closed` no final da execução).
+  Necessário reexecutar o script para confirmar a carga real dos dados.
+- [x] Rodar o script corrigido via GitHub Codespaces e validar (via
+  `SELECT COUNT(*)`) que os dados foram realmente persistidos —
+  **confirmado em 2026-07-24: 500 clientes e 5.000 avaliações**, números
+  batendo exatamente com o esperado. Fase 2 (Banco de Dados) concluída.
+- [x] **Bugs de realismo corrigidos** (revisão manual dos dados gerados):
+  - `email` não tinha nenhuma relação com `nome` (Faker gerava os dois de
+    forma independente) — corrigido: e-mail agora derivado do nome
+    (acentos removidos, títulos como "Dr./Dra." filtrados)
+  - `telefone` vinha com formatos inconsistentes (`fake.phone_number()`
+    misturava com/sem DDD, com/sem código de país) — corrigido: sempre
+    `(DDD) 9XXXX-XXXX`, com DDD sorteado de uma lista de DDDs reais do Brasil
+  - `id_cliente` começando em 1001 em vez de 1: **não é bug** — sequências
+    do Postgres não são revertidas por rollback; execuções anteriores (antes
+    da correção do `commit()`) consumiram IDs mesmo tendo sido descartadas.
+    Documentado o comando para reset limpo (`TRUNCATE ... RESTART IDENTITY`)
+    se desejado.
+  - `id_cidade` com `NULL`: comportamento esperado (~30% dos clientes,
+    simulando CEP não resolvido — ver ADR-002)
+  - `criado_em` exibido em UTC: comportamento correto de `TIMESTAMPTZ`
+    (armazena em UTC por padrão; conversão para horário local é
+    responsabilidade da camada de consumo — documentado em
+    `data_model_relational.md`)
 - [ ] Definição da tecnologia de interface do Pinpad/Totem (Streamlit
   standalone vs. rota Flask minimalista) — decisão adiada para a Fase 5
 
@@ -141,6 +184,7 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
 | `psycopg2` incompatível com serverless do Databricks | **Identificado e mitigado** — ver ADR 001 |
 | Supabase free tier sem backup automático | Monitorado — mitigação via scripts de schema versionados no Git |
 | Scraping de fontes como Reclame Aqui (ToS) | Ainda não avaliado — a validar na Fase de Ingestão |
+| Rede corporativa bloqueia porta 5432 (Postgres) para conexões locais | **Confirmado e mitigado** — uso de GitHub Codespaces para qualquer script com conexão direta ao banco |
 
 ## Próximos passos (Fase 2 — Banco de Dados)
 

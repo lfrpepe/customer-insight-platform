@@ -213,6 +213,21 @@ usado em filtro direto) nem em colunas de baixa seletividade como `nota`
 (CHECK de 1 a 5 não justifica índice — scan filtrado é barato o suficiente
 no volume esperado).
 
+## Fuso horário de `criado_em`
+
+`TIMESTAMPTZ` armazena o instante internamente em UTC — isso é proposital e
+é boa prática (elimina ambiguidade de fuso na gravação). Ao consultar via
+SQL Editor ou qualquer cliente sem `TimeZone` configurado, o valor aparece
+em UTC, não em horário de Brasília (UTC-3) — isso é comportamento esperado
+do tipo, não um dado incorreto. Para exibir no horário local:
+
+```sql
+SELECT criado_em AT TIME ZONE 'America/Sao_Paulo' FROM clientes;
+```
+
+Ferramentas de consumo (Power BI, relatórios) devem aplicar essa conversão
+na camada de apresentação, não o banco.
+
 ## Fora de escopo na Fase 1
 
 `funcionarios`, `departamentos`, `chamados` e SLA entram apenas quando a fase

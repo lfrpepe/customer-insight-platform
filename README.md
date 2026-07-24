@@ -28,7 +28,7 @@ evolutiva (permite crescer em funcionalidades sem reestruturação).
 
 ## Fontes de avaliação
 
-O projeto simula 4 canais distintos de captura, cada um com um grau diferente
+O projeto simula 5 canais distintos de captura, cada um com um grau diferente
 de estrutura — o que é proposital, para demonstrar modelagem de dados capaz
 de lidar com dado estruturado e não estruturado ao mesmo tempo:
 
@@ -71,6 +71,25 @@ tests/          testes automatizados
 .github/        workflows de CI/CD e agendamento
 ```
 
+## Como rodar localmente
+
+```bash
+git clone <url-do-repositorio>
+cd customer-insight-platform
+python -m venv venv
+venv\Scripts\Activate.ps1        # Windows (PowerShell)
+# source venv/bin/activate       # Mac/Linux
+
+pip install -r requirements.txt
+cp .env.example .env             # preencher com credenciais reais do Supabase
+python src/database/scripts/generate_seed_dev.py
+```
+
+**Nota:** conexão direta ao banco (porta 5432) pode ser bloqueada por redes
+corporativas restritivas — nesse caso, use
+[GitHub Codespaces](https://github.com/features/codespaces) em vez do
+ambiente local.
+
 ## Status do projeto
 
 O andamento por fase é mantido em [`docs/status.md`](docs/status.md).
@@ -81,6 +100,7 @@ O andamento por fase é mantido em [`docs/status.md`](docs/status.md).
 - [Modelo Relacional](docs/data_model_relational.md)
 - [Modelo Dimensional](docs/data_model_dimensional.md)
 - [Decisões técnicas (ADRs)](docs/decisions/)
+- [Regras de workflow com IA](docs/AI_WORKFLOW_RULES.md)
 
 ## Sobre o processo de desenvolvimento
 

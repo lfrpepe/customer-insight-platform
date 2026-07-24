@@ -21,6 +21,7 @@ do schema.sql antes.
 
 import os
 import random
+import unicodedata
 from datetime import datetime, timedelta
 
 import pg8000
@@ -158,6 +159,47 @@ def sortear_persona() -> str:
     return random.choices(personas, weights=pesos, k=1)[0]
 
 
+# DDDs válidos no Brasil (todos os estados) — usados para gerar telefones
+# padronizados, evitando a inconsistência de formato do fake.phone_number()
+# (que mistura com/sem DDD e com/sem código de país aleatoriamente).
+DDDS_VALIDOS = [
+    11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 24, 27, 28, 31, 32, 33, 34,
+    35, 37, 38, 41, 42, 43, 44, 45, 46, 47, 48, 49, 51, 53, 54, 55, 61, 62,
+    63, 64, 65, 66, 67, 68, 69, 71, 73, 74, 75, 77, 79, 81, 82, 83, 84, 85,
+    86, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99,
+]
+
+
+def gerar_telefone() -> str:
+    """Sempre no formato (DDD) 9XXXX-XXXX — celular brasileiro padronizado."""
+    ddd = random.choice(DDDS_VALIDOS)
+    parte1 = random.randint(0, 9999)
+    parte2 = random.randint(0, 9999)
+    return f"({ddd}) 9{parte1:04d}-{parte2:04d}"
+
+
+DOMINIOS_EMAIL = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com.br"]
+
+
+def gerar_email(nome: str, emails_usados: set) -> str:
+    """
+    Deriva o e-mail do próprio nome (ex.: "Maite Souza" -> "maite.souza@...") —
+    diferente de fake.unique.email(), que gera algo desconectado do nome.
+    """
+    sem_acento = unicodedata.normalize("NFKD", nome.lower()).encode("ascii", "ignore").decode("ascii")
+    partes = [p for p in sem_acento.replace("'", "").split() if p.isalpha()]
+    base = f"{partes[0]}.{partes[-1]}" if len(partes) > 1 else (partes[0] if partes else "cliente")
+
+    dominio = random.choice(DOMINIOS_EMAIL)
+    email = f"{base}@{dominio}"
+    sufixo = 1
+    while email in emails_usados:
+        sufixo += 1
+        email = f"{base}{sufixo}@{dominio}"
+    emails_usados.add(email)
+    return email
+
+
 # ============================================================================
 # Conexão
 # ============================================================================
@@ -227,6 +269,7 @@ def inserir_clientes(cur, ids_cidades: dict):
     personas = []
     lista_cidades = list(ids_cidades.keys())
     cpfs_usados = set()
+    emails_usados = set()
 
     for _ in range(QTD_CLIENTES):
         nome = fake.name()
@@ -234,8 +277,8 @@ def inserir_clientes(cur, ids_cidades: dict):
         while cpf in cpfs_usados:
             cpf = fake.cpf().replace(".", "").replace("-", "")
         cpfs_usados.add(cpf)
-        email = fake.unique.email()
-        telefone = fake.phone_number()
+        email = gerar_email(nome, emails_usados)
+        telefone = gerar_telefone()
 
         id_cidade = None
         if random.random() < 0.70:
@@ -323,30 +366,34 @@ def inserir_avaliacoes(cur, linhas, tamanho_lote: int = 500):
 def main():
     conn = conectar()
     try:
-        with conn:
-            with conn.cursor() as cur:
-                print("Inserindo estados...")
-                ids_estados = inserir_estados(cur)
+        with conn.cursor() as cur:
+            print("Inserindo estados...")
+            ids_estados = inserir_estados(cur)
 
-                print("Inserindo cidades...")
-                ids_cidades = inserir_cidades(cur, ids_estados)
+            print("Inserindo cidades...")
+            ids_cidades = inserir_cidades(cur, ids_estados)
 
-                print("Inserindo categorias...")
-                ids_categorias = inserir_categorias(cur)
+            print("Inserindo categorias...")
+            ids_categorias = inserir_categorias(cur)
 
-                print("Lendo origens (já seedadas pelo schema.sql)...")
-                ids_origens = obter_origens(cur)
+            print("Lendo origens (já seedadas pelo schema.sql)...")
+            ids_origens = obter_origens(cur)
 
-                print(f"Inserindo {QTD_CLIENTES} clientes...")
-                ids_clientes, personas = inserir_clientes(cur, ids_cidades)
+            print(f"Inserindo {QTD_CLIENTES} clientes...")
+            ids_clientes, personas = inserir_clientes(cur, ids_cidades)
 
-                print(f"Gerando {QTD_AVALIACOES} avaliações em memória...")
-                linhas_avaliacoes = gerar_linhas_avaliacoes(
-                    ids_clientes, personas, ids_categorias, ids_origens
-                )
+            print(f"Gerando {QTD_AVALIACOES} avaliações em memória...")
+            linhas_avaliacoes = gerar_linhas_avaliacoes(
+                ids_clientes, personas, ids_categorias, ids_origens
+            )
 
-                print("Inserindo avaliações (em lote)...")
-                inserir_avaliacoes(cur, linhas_avaliacoes)
+            print("Inserindo avaliações (em lote)...")
+            inserir_avaliacoes(cur, linhas_avaliacoes)
+
+        # COMMIT explícito — pg8000 tem autocommit=False por padrão, e o
+        # close() da conexão NÃO comita a transação (diferente de alguns
+        # outros drivers). Sem esta linha, tudo seria descartado ao fechar.
+        conn.commit()
 
         print(
             f"\nConcluído: {len(ids_estados)} estados | {len(ids_cidades)} cidades | "
@@ -356,6 +403,11 @@ def main():
     except KeyError as e:
         print(f"\nErro: variável de ambiente {e} não encontrada. Confira seu arquivo .env "
               f"(veja .env.example para os nomes esperados).")
+    except Exception:
+        # Qualquer outro erro durante a transação: desfaz tudo, não deixa
+        # dado parcial gravado (ex.: só metade das avaliações inseridas).
+        conn.rollback()
+        raise
     finally:
         conn.close()
 

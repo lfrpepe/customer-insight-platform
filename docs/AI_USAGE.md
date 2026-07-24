@@ -40,13 +40,36 @@ implementação, engenharia de dados e documentação.
   ADR, não escondida. Credenciais isoladas em `.env` (não versionado), com
   `.env.example` documentando as variáveis esperadas — necessário por este
   ser um repositório público.
+- **Diagnóstico de restrição de rede corporativa** — ao falhar a conexão
+  local com o Supabase (`ConnectionRefusedError`), a IA orientou um teste
+  isolado de conectividade de rede (`Test-NetConnection`) antes de suspeitar
+  do código, confirmando bloqueio de porta pela rede corporativa e
+  direcionando para a solução já prevista na arquitetura (GitHub Codespaces).
+- **Correção de bug próprio** — uma execução aparentemente bem-sucedida do
+  script de seed ocultava a ausência de um `commit()` explícito na
+  transação (o driver usado não comita automaticamente ao fechar a
+  conexão); a IA identificou o problema ao investigar um erro secundário,
+  corrigiu e orientou a reexecução — confirmada com sucesso (500 clientes,
+  5.000 avaliações persistidos).
+- **Diagnóstico de erro de infraestrutura do Supabase** — investigação de
+  um erro (`schema "pg_pgrst_no_exposed_schemas" does not exist`) via busca
+  na documentação oficial, confirmando tratar-se de comportamento esperado
+  (consequência de uma configuração já decidida pelo autor — Data API
+  desabilitada) e não uma falha real do projeto.
 - **Suporte a debugging de problemas reais de ambiente** — por exemplo, o
   diagnóstico passo a passo de um driver PostgreSQL incompatível com o
   compute serverless do Databricks Free Edition, isolando a causa (DNS → TCP →
   driver) até a resolução, documentado no
   [ADR 001](decisions/001-driver-postgres-databricks-serverless.md).
+- **Revisão de realismo dos dados gerados** — após a primeira carga real no
+  Supabase, o autor revisou os dados manualmente e apontou inconsistências
+  (e-mail sem relação com o nome, telefone em formatos variados); a IA
+  corrigiu ambos, e também esclareceu, distinguindo de bugs reais, três
+  comportamentos que eram esperados por design (IDs não sequenciais desde 1
+  por causa de sequências não-transacionais do Postgres, `id_cidade` nulo
+  por design, e exibição em UTC de colunas `TIMESTAMPTZ`).
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
-  dados, status do projeto), mantida atualizada a cada decisão relevante —
+  dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada
   discussão técnica gerava uma mudança real no schema ou na estratégia.
 
