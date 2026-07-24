@@ -1,8 +1,17 @@
 # Status do Projeto — Customer Insight Platform
 
-**Última atualização:** 2026-07-23
-**Fase atual:** 2 — Estrutura do Repositório / Banco de Dados → **Concluída**
+**Última atualização:** 2026-07-24
+**Fases concluídas:** 1 (Arquitetura), 2 (Modelagem de Dados), 3 (Estrutura
+do Repositório), 4 (Banco de Dados)
 **Próxima fase:** 5 — Backend (Flask, Pinpad/Totem, integração Telemarketing)
+
+> Nota sobre numeração: as seções abaixo agrupam os passos 1-2 (Arquitetura
+> + Modelagem de Dados) e 3-4 (Estrutura do Repositório + Banco de Dados)
+> em blocos únicos, por terem sido executados em conjunto — mas os 10
+> passos do roadmap original (Arquitetura → Modelagem → Estrutura do
+> Repositório → Banco de Dados → Backend → ETL → Engenharia de Dados → ML
+> → BI → Melhorias) continuam sendo a referência oficial de fases do
+> projeto. Nenhum passo foi pulado.
 
 ## Ambiente configurado
 
@@ -49,7 +58,7 @@
   curtas/serverless, não é o padrão de uso aqui).
 - Free tier do Supabase pausa após 7 dias de inatividade (dados preservados, sem
   backup automático). Decisão: aceitar pausa manual por enquanto; heartbeat via
-  GitHub Actions fica para a Fase 2 (Qualidade e Automação), se necessário.
+  GitHub Actions fica para uma fase futura (10 — Melhorias), se necessário.
 - **Confirmado:** a rede corporativa do autor bloqueia ativamente a porta
   5432 (Postgres) para conexões de saída — testado com `Test-NetConnection`
   (`TcpTestSucceeded: False`), não é problema de driver/script. GitHub
@@ -66,7 +75,7 @@
   direta via `pg8000`, que não passa pelo PostgREST) — apenas ruído nos
   logs. Nenhuma ação necessária.
 
-## Fase 1 — Modelagem de Dados (Concluída)
+## Fases 1-2 — Arquitetura e Modelagem de Dados (Concluída)
 
 - [x] Modelo relacional definido (Clientes, Avaliações, Categorias, Origem,
   Cidade, Estado) — ver `docs/data_model_relational.md`
@@ -114,7 +123,7 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
 `id_cliente` conhecido); `Pinpad`, `Totem` e `Scraping` não capturam
 `id_cliente`.
 
-## Fase 2 — Estrutura do Repositório / Banco de Dados (Em andamento)
+## Fases 3-4 — Estrutura do Repositório e Banco de Dados (Concluída)
 
 - [x] Estrutura de pastas do repositório definida (`src/`, `docs/`,
   `notebooks/`, `tests/`, `.github/`)
@@ -154,7 +163,8 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
 - [x] Rodar o script corrigido via GitHub Codespaces e validar (via
   `SELECT COUNT(*)`) que os dados foram realmente persistidos —
   **confirmado em 2026-07-24: 500 clientes e 5.000 avaliações**, números
-  batendo exatamente com o esperado. Fase 2 (Banco de Dados) concluída.
+  batendo exatamente com o esperado. Fases 3-4 (Estrutura do Repositório e
+  Banco de Dados) concluídas.
 - [x] **Bugs de realismo corrigidos** (revisão manual dos dados gerados):
   - `email` não tinha nenhuma relação com `nome` (Faker gerava os dois de
     forma independente) — corrigido: e-mail agora derivado do nome
@@ -186,11 +196,10 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
 | Scraping de fontes como Reclame Aqui (ToS) | Ainda não avaliado — a validar na Fase de Ingestão |
 | Rede corporativa bloqueia porta 5432 (Postgres) para conexões locais | **Confirmado e mitigado** — uso de GitHub Codespaces para qualquer script com conexão direta ao banco |
 
-## Próximos passos (Fase 2 — Banco de Dados)
+## Próximos passos (Fase 5 — Backend)
 
-- Seed de dados de desenvolvimento: pool de clientes fictícios + geração de
-  avaliações distribuídas entre as 5 origens
-- Confirmar estrutura de pastas com primeiro commit versionado
-- Iniciar planejamento da Fase 5 (Backend): CRUD Flask + interface única
-  Pinpad/Totem (com seleção de modo) + integração com sistema de
-  Telemarketing
+- CRUD Flask para avaliações (Formulário Web)
+- Interface única de Pinpad/Totem, com seleção de modo
+- Integração com sistema de Telemarketing (pesquisa pós-atendimento)
+- Definir tecnologia da interface Pinpad/Totem (Streamlit standalone vs.
+  rota Flask minimalista — decisão adiada desde a Fase 3-4)

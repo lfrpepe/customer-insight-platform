@@ -61,6 +61,12 @@ implementação, engenharia de dados e documentação.
   compute serverless do Databricks Free Edition, isolando a causa (DNS → TCP →
   driver) até a resolução, documentado no
   [ADR 001](decisions/001-driver-postgres-databricks-serverless.md).
+- **Correção de numeração de fases** — o `status.md` havia agrupado os
+  passos 3 e 4 do roadmap original (Estrutura do Repositório e Banco de
+  Dados) sob um rótulo próprio ("Fase 2"), criando ambiguidade quando o
+  autor questionou se a Fase 5 (Backend) representava um "pulo" de fase; a
+  IA identificou a causa raiz (numeração interna divergente do roadmap
+  oficial de 10 passos) e corrigiu a rotulagem em todos os documentos afetados.
 - **Revisão de realismo dos dados gerados** — após a primeira carga real no
   Supabase, o autor revisou os dados manualmente e apontou inconsistências
   (e-mail sem relação com o nome, telefone em formatos variados); a IA

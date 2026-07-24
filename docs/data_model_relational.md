@@ -109,7 +109,7 @@ o dado veio.
 | natureza_registro | VARCHAR(20) | NOT NULL, default `'Real'`, CHECK IN ('Sintético','Real') |
 | criado_em  | TIMESTAMPTZ   | NOT NULL, default now()                             |
 
-Decisões confirmadas na Fase 1:
+Decisões confirmadas na Fase 2 (Modelagem de Dados):
 
 - **`id_cidade` opcional:** cliente pode ser cadastrado sem CEP/cidade
   resolvida no momento da avaliação; o dado é completado posteriormente via
@@ -121,7 +121,7 @@ Decisões confirmadas na Fase 1:
   dados fictícios deve reaproveitar um pool de clientes (200–500) em vez de
   criar um cliente novo por avaliação — preserva `id_cliente` como chave
   estável para histórico e detecção de recorrência.
-- **`natureza_registro` (Fase 2, ver [ADR 003](decisions/003-natureza-registro-sintetico-real.md)):**
+- **`natureza_registro` (Fase 4 — Banco de Dados, ver [ADR 003](decisions/003-natureza-registro-sintetico-real.md)):**
   distingue dado gerado pelo seed de desenvolvimento (`'Sintético'`) de dado
   capturado pelos sistemas reais — Flask, Pinpad, Totem, Scraper
   (`'Real'`, default). Necessário porque os dois tipos de registro coexistem
@@ -141,7 +141,7 @@ Decisões confirmadas na Fase 1:
 | natureza_registro | VARCHAR(20) | NOT NULL, default `'Real'`, CHECK IN ('Sintético','Real') |
 | criado_em      | TIMESTAMPTZ | NOT NULL, default now()                       |
 
-Decisões confirmadas na Fase 1:
+Decisões confirmadas na Fase 2 (Modelagem de Dados):
 
 - **Escala de nota fixa em 1–5**, garantida por `CHECK` no banco (não só na
   aplicação) — é a regra mais barata de impor na origem e evita dado inválido
@@ -165,7 +165,7 @@ Decisões confirmadas na Fase 1:
   responsabilidade da camada Silver (Databricks), não do Postgres — evita
   lógica de negócio duplicada em duas camadas e mantém o operacional como
   ingestão fiel da origem.
-- **`natureza_registro` (Fase 2, ver [ADR 003](decisions/003-natureza-registro-sintetico-real.md)):**
+- **`natureza_registro` (Fase 4 — Banco de Dados, ver [ADR 003](decisions/003-natureza-registro-sintetico-real.md)):**
   distingue dado gerado pelo seed de desenvolvimento (`'Sintético'`) de dado
   capturado pelos sistemas reais — Flask, Pinpad, Totem, Scraper, Telemarketing
   (`'Real'`, default). Ortogonal a `id_origem`: uma avaliação de `Scraping`
@@ -228,7 +228,7 @@ SELECT criado_em AT TIME ZONE 'America/Sao_Paulo' FROM clientes;
 Ferramentas de consumo (Power BI, relatórios) devem aplicar essa conversão
 na camada de apresentação, não o banco.
 
-## Fora de escopo na Fase 1
+## Fora de escopo na Fase 2 (Modelagem de Dados)
 
 `funcionarios`, `departamentos`, `chamados` e SLA entram apenas quando a fase
 correspondente do roadmap (ver `README.md`) for iniciada, reaproveitando esta
