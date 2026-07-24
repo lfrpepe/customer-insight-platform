@@ -220,6 +220,17 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
   é atendimento presencial único em caixa, o operador seleciona a
   categoria diretamente (mesmo mecanismo do Formulário Web). `config/
   settings.py` (guichê) foi removido; `data_model_relational.md` corrigido.
+- [x] Correção: telefone normalizado para **somente dígitos** (DDD+número,
+  sem parênteses/traço) — mesmo padrão do CPF, tanto no schema Pydantic
+  (`validators/cliente.py::telefone_normalizado`) quanto no gerador do
+  seed sintético (`generate_seed_dev.py::gerar_telefone()`); dados já
+  seedados precisam de UPDATE de normalização (ver AI_USAGE.md).
+- [x] Correção: Telemarketing devolvia erro `500` cru (violação de FK do
+  Postgres) quando `id_cliente`/`id_categoria` inexistentes eram enviados
+  — teste confirmou. Adicionado `verificar_cliente_existe`/
+  `verificar_categoria_existe` em `crud/avaliacoes.py`, chamados antes do
+  insert no `router_telemarketing.py`; agora devolve `422` legível, igual
+  aos demais routers.
 - [ ] Templates HTML (Jinja2) para Formulário Web, Pinpad e Totem — rotas
   já existem, faltam as telas
 - [ ] Interface de Pinpad/Totem, com seleção de modo

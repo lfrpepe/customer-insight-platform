@@ -94,6 +94,25 @@ implementação, engenharia de dados e documentação.
   Pinpad passaram a receber `categoria` diretamente (igual ao Formulário
   Web), `config/settings.py` foi removido, e a descrição do Pinpad em
   `data_model_relational.md` foi ajustada para refletir a regra real.
+- **Correção de normalização de telefone** — teste real via Swagger revelou
+  que o schema do Formulário Web gravava o telefone sem padronização. A IA
+  propôs inicialmente replicar o formato `(DDD) 9XXXX-XXXX` já usado no
+  seed sintético; o usuário preferiu, por boa prática, o formato somente
+  dígitos (mesmo padrão do CPF), mais simples para busca/deduplicação e
+  sem necessidade de reprocessar formatação em ETL/BI. Ajustado em 3
+  pontos para manter consistência: `validators/cliente.py`
+  (`telefone_normalizado`), schema do Formulário Web, e
+  `generate_seed_dev.py::gerar_telefone()` (para futuras repopulações).
+  Dados já existentes no banco precisam do UPDATE de normalização abaixo
+  antes de considerar a coluna consistente:
+  `UPDATE clientes SET telefone = regexp_replace(telefone, '\D', '', 'g') WHERE telefone IS NOT NULL;`
+- **Correção de bug real no router de Telemarketing** — teste com
+  `id_cliente`/`id_categoria` inexistentes retornou erro `500` cru
+  (violação de foreign key do Postgres) em vez de um erro tratado.
+  Adicionadas verificações explícitas (`verificar_cliente_existe`,
+  `verificar_categoria_existe`) antes do `INSERT`, devolvendo `422` com
+  mensagem legível — mesmo padrão de tratamento já usado nos outros 3
+  routers.
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada

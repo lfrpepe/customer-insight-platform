@@ -104,7 +104,7 @@ o dado veio.
 | nome       | VARCHAR(150)  | NOT NULL                                            |
 | cpf        | CHAR(11)      | UNIQUE, apenas dígitos (sem máscara)                 |
 | email      | VARCHAR(150)  | opcional                                            |
-| telefone   | VARCHAR(20)   | opcional                                            |
+| telefone   | VARCHAR(20)   | opcional — somente dígitos (DDD+número, sem formatação), mesmo padrão do CPF |
 | id_cidade  | INTEGER       | **opcional**, FK -> cidades                          |
 | natureza_registro | VARCHAR(20) | NOT NULL, default `'Real'`, CHECK IN ('Sintético','Real') |
 | criado_em  | TIMESTAMPTZ   | NOT NULL, default now()                             |

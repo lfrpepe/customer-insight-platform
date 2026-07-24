@@ -171,11 +171,16 @@ DDDS_VALIDOS = [
 
 
 def gerar_telefone() -> str:
-    """Sempre no formato (DDD) 9XXXX-XXXX — celular brasileiro padronizado."""
+    """
+    Celular brasileiro (DDD + 9 dígitos), somente dígitos — sem formatação
+    (parênteses/traço), mesmo padrão usado pelo backend (Fase 5, ver
+    `src/validators/cliente.py::telefone_normalizado`). Formatação para
+    exibição, se necessária, fica a cargo da camada de apresentação.
+    """
     ddd = random.choice(DDDS_VALIDOS)
     parte1 = random.randint(0, 9999)
     parte2 = random.randint(0, 9999)
-    return f"({ddd}) 9{parte1:04d}-{parte2:04d}"
+    return f"{ddd}9{parte1:04d}{parte2:04d}"
 
 
 DOMINIOS_EMAIL = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com.br"]

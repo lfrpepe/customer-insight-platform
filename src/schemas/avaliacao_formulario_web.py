@@ -10,7 +10,7 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-from src.validators.cliente import cpf_valido
+from src.validators.cliente import cpf_valido, telefone_normalizado
 
 
 class AvaliacaoFormularioWebCreate(BaseModel):
@@ -30,3 +30,11 @@ class AvaliacaoFormularioWebCreate(BaseModel):
         if not cpf_valido(apenas_digitos):
             raise ValueError("CPF inválido.")
         return apenas_digitos
+
+    @field_validator("telefone")
+    @classmethod
+    def valida_telefone(cls, v: Optional[str]) -> Optional[str]:
+        """Normaliza para somente dígitos (DDD+número) — mesmo padrão do CPF."""
+        if v is None:
+            return v
+        return telefone_normalizado(v)

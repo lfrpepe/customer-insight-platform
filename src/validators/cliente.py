@@ -1,5 +1,7 @@
 """Validações de regra de negócio que o Pydantic não cobre nativamente."""
 
+import re
+
 
 def cpf_valido(cpf: str) -> bool:
     """
@@ -21,3 +23,24 @@ def cpf_valido(cpf: str) -> bool:
     digito_1 = _digito_verificador(cpf[:9])
     digito_2 = _digito_verificador(cpf[:9] + str(digito_1))
     return cpf[-2:] == f"{digito_1}{digito_2}"
+
+
+def telefone_normalizado(telefone: str) -> str:
+    """
+    Normaliza para o único formato de telefone do projeto: apenas dígitos
+    (DDD + número, sem parênteses/traço/espaço) — mesmo padrão adotado
+    para o CPF. Mais simples para busca/deduplicação e evita reprocessar
+    formatação nas camadas seguintes (ETL, BI); formatação para exibição,
+    se necessária, fica a cargo da camada de apresentação.
+
+    Aceita qualquer entrada com 10 ou 11 dígitos, com ou sem formatação
+    prévia (parênteses, traço, espaço); rejeita o resto.
+    """
+    digitos = re.sub(r"\D", "", telefone)
+
+    if len(digitos) == 11:  # DDD + 9 + 8 dígitos (celular, já com o 9)
+        return digitos
+    if len(digitos) == 10:  # DDD + 8 dígitos (sem o 9 — normaliza incluindo)
+        return digitos[:2] + "9" + digitos[2:]
+    raise ValueError("Telefone deve ter 10 ou 11 dígitos, incluindo o DDD.")
+

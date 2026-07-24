@@ -34,6 +34,27 @@ def buscar_id_categoria(conn: Connection, nome_categoria: str) -> int:
         return row[0]
 
 
+def verificar_cliente_existe(conn: Connection, id_cliente: int) -> None:
+    """
+    Usado pelo Telemarketing: diferente do Formulário Web (que recebe CPF e
+    resolve/cria o cliente), aqui o id_cliente já vem pronto do CRM — mas
+    precisa ser conferido antes do INSERT, senão um id inexistente vira um
+    erro cru de foreign key do Postgres (500) em vez de um 422 legível.
+    """
+    with conn.cursor() as cur:
+        cur.execute("SELECT 1 FROM clientes WHERE id_cliente = %s", (id_cliente,))
+        if cur.fetchone() is None:
+            raise ValueError(f"Cliente com id_cliente={id_cliente} não encontrado.")
+
+
+def verificar_categoria_existe(conn: Connection, id_categoria: int) -> None:
+    """Mesma lógica de `verificar_cliente_existe`, para id_categoria já resolvido (Telemarketing)."""
+    with conn.cursor() as cur:
+        cur.execute("SELECT 1 FROM categorias WHERE id_categoria = %s", (id_categoria,))
+        if cur.fetchone() is None:
+            raise ValueError(f"Categoria com id_categoria={id_categoria} não encontrada.")
+
+
 def buscar_ou_criar_cliente(
     conn: Connection,
     nome: str,
