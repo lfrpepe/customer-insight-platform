@@ -1,27 +1,35 @@
 {% extends "base.html" %}
-{% block title %}Customer Insight Platform — Telas{% endblock %}
+{% block title %}Customer Insight Platform — Painel{% endblock %}
+{% block wrapper_class %}tela-larga{% endblock %}
 {% block content %}
-<div class="card">
-  <p class="eyebrow">Customer Insight Platform</p>
-  <h1>Escolha uma tela</h1>
+<div class="hub-header">
+  <p class="eyebrow">Painel de operação</p>
+  <h1>Escolha uma origem de avaliação</h1>
+</div>
 
-  <nav class="menu-telas">
-    <a href="/formulario-web">
-      Formulário Web
-      <span>Cliente identificado, categoria, comentário opcional</span>
-    </a>
-    <a href="/pinpad">
-      Pinpad
-      <span>Atendimento presencial em caixa — sem cliente</span>
-    </a>
-    <a href="/totem">
-      Totem
-      <span>Autoatendimento — só a nota</span>
-    </a>
-    <a href="/telemarketing-simulador">
-      Simulador — Telemarketing
-      <span>Representa o CRM/discador chamando a API (ADR-004)</span>
-    </a>
-  </nav>
+<div class="grid-origens">
+  <a class="card-origem" href="/formulario-web">
+    <span class="card-origem-tag">Cliente identificado</span>
+    <h2>Formulário Web</h2>
+    <p>Cadastro completo — cliente, categoria e comentário opcional.</p>
+  </a>
+
+  <a class="card-origem" href="/pinpad">
+    <span class="card-origem-tag">Presencial</span>
+    <h2>Pinpad</h2>
+    <p>Atendimento em caixa — categoria selecionada pelo operador.</p>
+  </a>
+
+  <a class="card-origem" href="/totem">
+    <span class="card-origem-tag">Autoatendimento</span>
+    <h2>Totem</h2>
+    <p>Avaliação rápida, apenas a nota.</p>
+  </a>
+
+  <a class="card-origem" href="/telemarketing-simulador">
+    <span class="card-origem-tag card-origem-tag--simulador">Simulador</span>
+    <h2>Telemarketing</h2>
+    <p>Representa o CRM/discador chamando a API (ADR-004).</p>
+  </a>
 </div>
 {% endblock %}

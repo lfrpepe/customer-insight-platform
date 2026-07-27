@@ -151,6 +151,23 @@ implementação, engenharia de dados e documentação.
   da tela, com animação de entrada/saída — reutilizados via
   `src/static/app.js` em todas as 4 telas. Adicionada também uma tela de
   navegação (`/`) listando as 4 origens.
+- **Bug real corrigido: caminhos relativos em StaticFiles/Jinja2Templates**
+  — o autor reportou CSS/JS não carregando ("HTML puro", estrelas não
+  aparecendo). Diagnóstico: `StaticFiles(directory="src/static")` e
+  `Jinja2Templates(directory="src/templates")` eram relativos ao diretório
+  de onde o `uvicorn` é executado, não ao arquivo em si — se o comando
+  não rodar exatamente da raiz do repo, os arquivos estáticos retornam
+  404 silenciosamente (página carrega, mas sem estilo). Corrigido para
+  caminho absoluto derivado de `__file__` em `main.py` e
+  `router_views.py`; validado com teste automatizado simulando um
+  diretório de execução diferente.
+- **Redesign visual completo** — o autor pediu um visual mais elaborado e
+  "parecido com sistema de empresa", com a cor `#0F45A8`. Paleta
+  reconstruída em torno dessa cor (fundo neutro frio, ao invés do bege
+  anterior, para combinar com azul), fonte trocada para Inter, adicionado
+  cabeçalho de marca fixo (`.topbar`) presente em todas as telas, e o
+  painel inicial (`/`) redesenhado de lista de links para grid de cards
+  com tag de categoria — mais próximo de um painel de operação real.
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada

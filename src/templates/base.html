@@ -4,12 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Customer Insight Platform{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
   <script src="/static/app.js"></script>
+  <header class="topbar">
+    <a href="/" class="topbar-marca" style="text-decoration: none; color: inherit;">
+      <span class="topbar-logo">CI</span>
+      <span class="topbar-nome">Customer Insight Platform</span>
+    </a>
+    {% block topbar_extra %}{% endblock %}
+  </header>
   <main class="tela">
-    {% block content %}{% endblock %}
+    <div class="tela-conteudo {% block wrapper_class %}{% endblock %}">
+      {% block content %}{% endblock %}
+    </div>
   </main>
 </body>
 </html>

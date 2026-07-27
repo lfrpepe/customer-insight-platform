@@ -255,6 +255,15 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
   sozinho — resolve o problema de mensagem "sumida" em envios seguidos
   rápidos (Pinpad/Totem). Adicionada tela de navegação (`/`) entre as 4
   origens.
+- [x] Correção: caminhos de `StaticFiles`/`Jinja2Templates` eram
+  relativos (`"src/static"`, `"src/templates"`), dependentes do diretório
+  de onde o `uvicorn` é iniciado — trocados para caminhos absolutos
+  (`os.path.dirname(os.path.abspath(__file__))`), eliminando 404 silencioso
+  em `/static/*` se o comando rodar fora da raiz do repo.
+- [x] Redesign visual completo a pedido do autor: paleta trocada para azul
+  corporativo (`#0F45A8`), fonte Inter, cabeçalho de marca fixo em todas
+  as telas (`.topbar`), painel inicial (`/`) redesenhado como grid de
+  cards em vez de lista de links simples.
 
 ## Itens adiados conscientemente para fases futuras
 

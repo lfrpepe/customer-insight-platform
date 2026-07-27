@@ -18,7 +18,11 @@ from src.crud.avaliacoes import listar_categorias
 from src.database.connection import get_connection
 
 router = APIRouter(tags=["Telas"])
-templates = Jinja2Templates(directory="src/templates")
+
+# Caminho absoluto (mesmo motivo do StaticFiles em main.py) — evita template
+# não encontrado se o `uvicorn` rodar fora da raiz do repo.
+_TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "templates")
+templates = Jinja2Templates(directory=_TEMPLATES_DIR)
 
 
 def _contexto_base(request: Request) -> dict:
