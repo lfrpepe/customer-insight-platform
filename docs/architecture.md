@@ -79,15 +79,6 @@ Ambos gravam diretamente na tabela `avaliacoes`, reaproveitando o mesmo
 módulo `database/connection.py` do backend — não é um serviço separado com
 banco próprio.
 
-## Autenticação do backend
-
-Todas as rotas de Create (Formulário Web, Pinpad, Totem, Telemarketing)
-exigem um header `X-API-Key`, conferido contra a variável de ambiente
-`API_KEY` — ver [ADR 007](decisions/007-autenticacao-api-key.md). Não é um
-sistema de login (não há entidade de usuário no projeto): é uma chave
-única por integração, adequada ao escopo atual e sem a complexidade de
-modelar OAuth2/JWT sem um conceito de usuário definido.
-
 ## Por que Postgres não é a camada Bronze
 
 Um ponto importante, corrigido ainda na fase de planejamento: o PostgreSQL
@@ -123,6 +114,13 @@ decisão de driver usada no lado Databricks.
 
 - Ingestão do PostgreSQL para Delta Table, sem transformação
 - Sem regras de negócio, sem agregações, sem enriquecimento
+- Extração via `pg8000` + pandas + `spark.createDataFrame()`; full
+  overwrite para tabelas de catálogo e `clientes`, incremental por
+  watermark (`criado_em`) para `avaliacoes`, controlado por
+  `bronze.controle_ingestao` — ver
+  [ADR 008](decisions/008-estrategia-ingestao-bronze.md)
+- Orquestração via Databricks Jobs nativo, execução sob demanda nesta fase
+  — ver [ADR 009](decisions/009-orquestracao-databricks-jobs.md)
 
 ### Silver (Databricks)
 
@@ -151,9 +149,14 @@ Postgres operacional diretamente.
 |---|---|---|
 | Banco operacional | Supabase (Postgres free tier) | Postgres gerenciado gratuito, com painel completo |
 | Plataforma analítica | Databricks Free Edition | Spark gerenciado, gratuito, sem necessidade de infraestrutura própria |
-| Orquestração | GitHub Actions | Gratuito, versionado junto ao código, evita dependência de agendador externo pago |
+| Orquestração (ETL) | Databricks Jobs (nativo) | Scheduler e execução no mesmo ambiente; suportado no Free Edition (cota de 5 job tasks concorrentes); evita camada extra de integração via API (ver [ADR 009](decisions/009-orquestracao-databricks-jobs.md)) |
+| CI (backend) | GitHub Actions | Gratuito, versionado junto ao código; usado para lint/testes automatizados, não para orquestrar pipelines de dados |
 | Ambiente de desenvolvimento | GitHub Codespaces | Elimina dependência de instalação local aprovada por TI |
 | BI | Power BI Desktop | Ferramenta de mercado, gratuita para uso individual |
+
+Decisão revisada em relação à Fase 1: a orquestração da ingestão Bronze usa
+o agendador nativo do Databricks, não GitHub Actions como originalmente
+previsto — ver [ADR 009](decisions/009-orquestracao-databricks-jobs.md).
 
 ## Decisões técnicas registradas
 

@@ -24,7 +24,8 @@ evolutiva (permite crescer em funcionalidades sem reestruturação).
 | Backend / Cadastro | FastAPI | Cadastro de avaliações com validações — apenas *Create* (ver [ADR 006](docs/decisions/006-fastapi-em-vez-de-flask.md)); rotas protegidas por API Key (ver [ADR 007](docs/decisions/007-autenticacao-api-key.md)) |
 | Ingestão | Web Scraping + Pinpad + Totem + Telemarketing + APIs Públicas | Múltiplas fontes de dados, com níveis de estrutura diferentes |
 | BI | Power BI | Dashboards executivos sobre a camada Gold |
-| Versionamento | GitHub + GitHub Actions | Código, documentação, automação |
+| Versionamento | GitHub | Código e documentação versionados |
+| CI | GitHub Actions | Lint e testes automatizados do backend (ver ADR-009 — orquestração de dados usa Databricks Jobs, não GitHub Actions) |
 
 ## Fontes de avaliação
 

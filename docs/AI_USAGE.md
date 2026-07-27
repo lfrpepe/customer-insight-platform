@@ -196,6 +196,16 @@ implementação, engenharia de dados e documentação.
     consequente para resolver o `id_cliente` a partir do `data-id` da
     opção escolhida, já que o valor do campo deixou de ser o ID
     diretamente
+- **Definição da estratégia de ingestão Bronze antes de qualquer código**
+  — avaliados extração (`pg8000` + pandas + `spark.createDataFrame` vs.
+  `spark.read.jdbc`) e padrão de carga por tabela (full snapshot para
+  catálogo/`clientes` vs. incremental por watermark para `avaliacoes`),
+  com pesquisa das limitações reais do Databricks Free Edition (cota de
+  Jobs) antes de recomendar. A decisão de orquestração original da Fase 1
+  (GitHub Actions) foi revisada para Databricks Jobs nativo com base
+  nessa checagem — registrado em ADR-008 e ADR-009, com confirmação
+  explícita do autor sobre orquestração (Databricks Jobs) e cadência
+  (execução sob demanda, sem agendamento automático nesta fase).
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada

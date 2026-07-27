@@ -3,7 +3,7 @@
 **Última atualização:** 2026-07-27
 **Fases concluídas:** 1 (Arquitetura), 2 (Modelagem de Dados), 3 (Estrutura
 do Repositório), 4 (Banco de Dados), 5 (Backend)
-**Próxima fase:** 6 — ETL (Databricks, camadas Bronze/Silver/Gold)
+**Fase em andamento:** 6 — ETL (Databricks, camadas Bronze/Silver/Gold)
 
 > Nota sobre numeração: as seções abaixo agrupam os passos 1-2 (Arquitetura
 > + Modelagem de Dados) e 3-4 (Estrutura do Repositório + Banco de Dados)
@@ -56,6 +56,16 @@ do Repositório), 4 (Banco de Dados), 5 (Backend)
   projeto, então API Key simples foi preferida a OAuth2/JWT (que exigiria
   modelar usuários sem necessidade real ainda) e a HTTP Basic Auth (menos
   adequado a integrações de sistema, não pessoas logando).
+- **ADR 008** — Estratégia de ingestão Bronze: extração via `pg8000` +
+  pandas + `spark.createDataFrame`; full overwrite para tabelas de
+  catálogo (`estados`, `cidades`, `categorias`, `origens_avaliacao`) e
+  `clientes`; incremental por watermark (`criado_em`) para `avaliacoes`,
+  controlado por uma tabela `bronze.controle_ingestao`.
+- **ADR 009** — Orquestração da ingestão Bronze via Databricks Jobs
+  nativo, com execução sob demanda (manual) nesta fase — revisa a decisão
+  original da Fase 1 de usar GitHub Actions para orquestração de dados;
+  GitHub Actions passa a ser usado apenas para CI (lint/testes do
+  backend).
 
 ## Decisões de ambiente (não formalizadas como ADR, mas relevantes)
 
@@ -86,6 +96,10 @@ do Repositório), 4 (Banco de Dados), 5 (Backend)
   é comportamento esperado, não afeta o projeto (não interfere na conexão
   direta via `pg8000`, que não passa pelo PostgREST) — apenas ruído nos
   logs. Nenhuma ação necessária.
+- Confirmado (2026-07-27): o Databricks Free Edition suporta nativamente
+  o agendador de Jobs (execução serverless), com cota de 5 job tasks
+  concorrentes por conta — suficiente para o volume deste projeto. Isso
+  motivou a revisão da orquestração da Fase 6 (ver ADR-009).
 
 ## Fases 1-2 — Arquitetura e Modelagem de Dados (Concluída)
 
@@ -303,12 +317,21 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
   suficiente até lá. Não reconsiderar sem o autor pedir de novo
   explicitamente (mesmo princípio já aplicado ao pivô B2B descartado).
 
-## Próximos passos (Fase 6 — ETL)
+## Fase 6 — ETL (Em andamento)
 
-- [ ] Definir estratégia de ingestão Postgres → Databricks Bronze (batch
-  agendado vs. sob demanda)
-- [ ] Materializar Bronze como Delta Table, sem transformação (ver
-  `architecture.md`)
+- [x] Estratégia de ingestão Postgres → Databricks Bronze definida: extração
+  via `pg8000` + pandas + `spark.createDataFrame`; full overwrite para
+  tabelas de catálogo e `clientes`; incremental por watermark (`criado_em`)
+  para `avaliacoes`, controlado por `bronze.controle_ingestao` — ver
+  ADR-008
+- [x] Orquestração definida: Databricks Jobs nativo, execução sob demanda
+  (manual) nesta fase — decisão que revisa a orquestração original da
+  Fase 1 (GitHub Actions), que passa a ser usado apenas para CI — ver
+  ADR-009
+- [ ] Criar schema `bronze` e tabela `bronze.controle_ingestao` no Databricks
+- [ ] Implementar script/notebook de ingestão (um por tabela, reaproveitando
+  conexão `pg8000`)
+- [ ] Configurar Job no Databricks (execução manual) para disparar a
+  ingestão
 - [ ] Planejar Silver: padronização, limpeza, enriquecimento, análise de
   sentimento (Formulário Web e Scraping, únicas origens com comentário)
-
