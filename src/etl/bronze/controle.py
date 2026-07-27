@@ -10,9 +10,17 @@ usa isso; ver config.py).
 from datetime import datetime
 from typing import Optional
 
-from pyspark.sql import Row, SparkSession
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StringType, StructField, StructType, TimestampType
 
 from src.etl.bronze.config import TABELA_CONTROLE
+
+_SCHEMA_CONTROLE = StructType(
+    [
+        StructField("nome_tabela", StringType(), nullable=False),
+        StructField("ultima_carga_em", TimestampType(), nullable=False),
+    ]
+)
 
 
 def obter_ultima_carga(spark: SparkSession, tabela_postgres: str) -> Optional[datetime]:
@@ -36,6 +44,6 @@ def atualizar_ultima_carga(
     """
     spark.sql(f"DELETE FROM {TABELA_CONTROLE} WHERE nome_tabela = '{tabela_postgres}'")
     novo_registro = spark.createDataFrame(
-        [Row(nome_tabela=tabela_postgres, ultima_carga_em=novo_watermark)]
+        [(tabela_postgres, novo_watermark)], schema=_SCHEMA_CONTROLE
     )
     novo_registro.write.mode("append").saveAsTable(TABELA_CONTROLE)

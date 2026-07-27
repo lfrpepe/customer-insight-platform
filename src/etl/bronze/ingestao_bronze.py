@@ -45,7 +45,16 @@ def ingerir_tabela(spark: SparkSession, conn, config: dict) -> tuple[str, int, s
 
         if not pdf.empty:
             novo_watermark = pdf[coluna_watermark].max()
-            atualizar_ultima_carga(spark, tabela_postgres, novo_watermark)
+            try:
+                atualizar_ultima_carga(spark, tabela_postgres, novo_watermark)
+            except Exception as erro:  # noqa: BLE001
+                # Dados já gravados em `tabela_bronze` — não perder essa
+                # informação no resumo mesmo que o watermark tenha falhado.
+                return (
+                    tabela_postgres,
+                    linhas,
+                    f"dados carregados, mas watermark falhou: {erro}",
+                )
 
         return tabela_postgres, linhas, "ok (incremental)"
 
@@ -74,7 +83,7 @@ def main() -> None:
     for tabela, linhas, status in resumo:
         print(f"  - {tabela}: {linhas} linha(s) — {status}")
 
-    falhas = [r for r in resumo if r[2].startswith("falhou")]
+    falhas = [r for r in resumo if "falhou" in r[2]]
     if falhas:
         raise RuntimeError(
             f"{len(falhas)} tabela(s) falharam na ingestão: "
