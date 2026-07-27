@@ -249,6 +249,23 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
   compartilhado em `src/static/styles.css`.
 - [x] Fase 5 (Backend) concluída: 4 rotas de Create testadas, autenticadas
   e com tela HTML correspondente.
+- [x] Melhorias de UI a pedido do autor: nota trocada de botões numéricos
+  para picker de estrelas animado (`src/static/app.js::configurarEstrelas`);
+  mensagem inline trocada por toast fixo no topo, que aparece e some
+  sozinho — resolve o problema de mensagem "sumida" em envios seguidos
+  rápidos (Pinpad/Totem). Adicionada tela de navegação (`/`) entre as 4
+  origens.
+
+## Itens adiados conscientemente para fases futuras
+
+- **Login individual de operadores** — cogitado durante a Fase 5 (tela de
+  login que autentica o operador e distribui a API Key, em vez da chave
+  vir embutida no HTML). Adiado para a **Fase 10 (Melhorias)**, por decisão
+  do autor: implicaria criar uma tabela de usuários/operadores agora, o
+  que antecipa parte da entidade `Funcionários` — hoje fora de escopo até
+  ser modelada oficialmente (ver ADR-002). A API Key (ADR-007) segue
+  suficiente até lá. Não reconsiderar sem o autor pedir de novo
+  explicitamente (mesmo princípio já aplicado ao pivô B2B descartado).
 
 ## Próximos passos (Fase 6 — ETL)
 

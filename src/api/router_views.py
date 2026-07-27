@@ -25,6 +25,11 @@ def _contexto_base(request: Request) -> dict:
     return {"request": request, "api_key": os.environ.get("API_KEY", "")}
 
 
+@router.get("/")
+def tela_inicio(request: Request):
+    return templates.TemplateResponse("index.html", _contexto_base(request))
+
+
 @router.get("/formulario-web")
 def tela_formulario_web(request: Request, conn: Connection = Depends(get_connection)):
     contexto = _contexto_base(request)

@@ -27,9 +27,11 @@
     </select>
 
     <label>Nota</label>
-    <div class="nota-picker" id="nota-picker">
+    <div class="estrela-picker" id="nota-picker">
       {% for n in range(1, 6) %}
-      <button type="button" data-valor="{{ n }}">{{ n }}</button>
+      <button type="button" data-valor="{{ n }}" aria-label="{{ n }} estrela(s)">
+        <svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.26L21.5 9.27l-4.75 4.63L17.9 21 12 17.77 6.1 21l1.15-7.1L2.5 9.27l6.6-1.01L12 2z"/></svg>
+      </button>
       {% endfor %}
     </div>
 
@@ -38,8 +40,6 @@
 
     <button type="submit" class="btn-enviar">Enviar avaliação</button>
   </form>
-
-  <div class="mensagem" id="mensagem"></div>
 </div>
 
 <script>
@@ -48,25 +48,13 @@
   // internet pública (ver ADR-007). Se este formulário virar público,
   // esse padrão precisa mudar para outro modelo de proteção.
   const API_KEY = "{{ api_key }}";
-  let notaSelecionada = null;
-
-  document.querySelectorAll("#nota-picker button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("#nota-picker button").forEach((b) => b.classList.remove("selecionada"));
-      btn.classList.add("selecionada");
-      notaSelecionada = parseInt(btn.dataset.valor, 10);
-    });
-  });
+  const estrelas = configurarEstrelas("nota-picker");
 
   document.getElementById("form-avaliacao").addEventListener("submit", async (evento) => {
     evento.preventDefault();
-    const mensagem = document.getElementById("mensagem");
-    mensagem.className = "mensagem";
-    mensagem.textContent = "";
 
-    if (!notaSelecionada) {
-      mensagem.className = "mensagem erro";
-      mensagem.textContent = "Selecione uma nota de 1 a 5.";
+    if (!estrelas.valor) {
+      mostrarToast("Selecione uma nota de 1 a 5.", "erro");
       return;
     }
 
@@ -76,7 +64,7 @@
       email: document.getElementById("email").value || null,
       telefone: document.getElementById("telefone").value || null,
       categoria: document.getElementById("categoria").value,
-      nota: notaSelecionada,
+      nota: estrelas.valor,
       comentario: document.getElementById("comentario").value || null,
     };
 
@@ -88,19 +76,15 @@
       });
 
       if (resposta.ok) {
-        mensagem.className = "mensagem sucesso";
-        mensagem.textContent = "Avaliação registrada. Obrigado pelo retorno!";
+        mostrarToast("Avaliação registrada. Obrigado pelo retorno!", "sucesso");
         document.getElementById("form-avaliacao").reset();
-        document.querySelectorAll("#nota-picker button").forEach((b) => b.classList.remove("selecionada"));
-        notaSelecionada = null;
+        estrelas.reset();
       } else {
         const erro = await resposta.json();
-        mensagem.className = "mensagem erro";
-        mensagem.textContent = erro.detail || "Não foi possível registrar a avaliação.";
+        mostrarToast(erro.detail || "Não foi possível registrar a avaliação.", "erro");
       }
     } catch (e) {
-      mensagem.className = "mensagem erro";
-      mensagem.textContent = "Erro de conexão. Tente novamente.";
+      mostrarToast("Erro de conexão. Tente novamente.", "erro");
     }
   });
 </script>

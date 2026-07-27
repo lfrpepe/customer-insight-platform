@@ -23,36 +23,27 @@
   </select>
 
   <label>Nota (dígito do IVR)</label>
-  <div class="nota-picker" id="nota-picker">
+  <div class="estrela-picker" id="nota-picker">
     {% for n in range(1, 6) %}
-    <button type="button" data-valor="{{ n }}">{{ n }}</button>
+    <button type="button" data-valor="{{ n }}" aria-label="{{ n }} estrela(s)">
+      <svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.26L21.5 9.27l-4.75 4.63L17.9 21 12 17.77 6.1 21l1.15-7.1L2.5 9.27l6.6-1.01L12 2z"/></svg>
+    </button>
     {% endfor %}
   </div>
 
   <button type="button" class="btn-enviar" id="btn-enviar">Simular envio</button>
-  <div class="mensagem" id="mensagem"></div>
 </div>
 
 <script>
   const API_KEY = "{{ api_key }}";
-  let notaSelecionada = null;
-
-  document.querySelectorAll("#nota-picker button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("#nota-picker button").forEach((b) => b.classList.remove("selecionada"));
-      btn.classList.add("selecionada");
-      notaSelecionada = parseInt(btn.dataset.valor, 10);
-    });
-  });
+  const estrelas = configurarEstrelas("nota-picker");
 
   document.getElementById("btn-enviar").addEventListener("click", async () => {
-    const mensagem = document.getElementById("mensagem");
     const idCliente = parseInt(document.getElementById("id_cliente").value, 10);
     const idCategoria = parseInt(document.getElementById("categoria_select").value, 10);
 
-    if (!idCliente || !idCategoria || !notaSelecionada) {
-      mensagem.className = "mensagem erro";
-      mensagem.textContent = "Preencha o ID do cliente, a categoria e a nota.";
+    if (!idCliente || !idCategoria || !estrelas.valor) {
+      mostrarToast("Preencha o ID do cliente, a categoria e a nota.", "erro");
       return;
     }
 
@@ -60,20 +51,18 @@
       const resposta = await fetch("/avaliacoes/telemarketing", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-API-Key": API_KEY },
-        body: JSON.stringify({ id_cliente: idCliente, id_categoria: idCategoria, nota: notaSelecionada }),
+        body: JSON.stringify({ id_cliente: idCliente, id_categoria: idCategoria, nota: estrelas.valor }),
       });
 
       if (resposta.ok) {
-        mensagem.className = "mensagem sucesso";
-        mensagem.textContent = "Simulação registrada com sucesso.";
+        mostrarToast("Simulação registrada com sucesso.", "sucesso");
+        estrelas.reset();
       } else {
         const erro = await resposta.json();
-        mensagem.className = "mensagem erro";
-        mensagem.textContent = erro.detail || "Não foi possível registrar.";
+        mostrarToast(erro.detail || "Não foi possível registrar.", "erro");
       }
     } catch (e) {
-      mensagem.className = "mensagem erro";
-      mensagem.textContent = "Erro de conexão.";
+      mostrarToast("Erro de conexão.", "erro");
     }
   });
 </script>

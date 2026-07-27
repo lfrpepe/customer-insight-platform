@@ -5,6 +5,7 @@ Executar localmente:
     uvicorn src.api.main:app --reload
 
 Docs interativas (Swagger): http://127.0.0.1:8000/docs
+Tela de navegação entre as origens: /
 Telas HTML: /formulario-web, /pinpad, /totem, /telemarketing-simulador
 Todos os 4 POSTs de Create exigem o header 'X-API-Key' (ver ADR-007) — no
 Swagger, use o botão "Authorize" (cadeado) para informar a chave uma única

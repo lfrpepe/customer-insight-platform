@@ -5,22 +5,22 @@
   <p class="eyebrow">Autoatendimento</p>
   <h1>Avalie seu atendimento</h1>
 
-  <div class="nota-picker" id="nota-picker" style="margin-top: 12px;">
+  <div class="estrela-picker" id="nota-picker" style="justify-content: center; margin-top: 16px;">
     {% for n in range(1, 6) %}
-    <button type="button" data-valor="{{ n }}" style="padding: 24px 0; font-size: 24px;">{{ n }}</button>
+    <button type="button" data-valor="{{ n }}" aria-label="{{ n }} estrela(s)" style="padding: 8px;">
+      <svg viewBox="0 0 24 24" style="width: 48px; height: 48px;"><path d="M12 2l2.9 6.26L21.5 9.27l-4.75 4.63L17.9 21 12 17.77 6.1 21l1.15-7.1L2.5 9.27l6.6-1.01L12 2z"/></svg>
+    </button>
     {% endfor %}
   </div>
-
-  <div class="mensagem" id="mensagem"></div>
 </div>
 
 <script>
   const API_KEY = "{{ api_key }}";
+  const estrelas = configurarEstrelas("nota-picker");
 
   document.querySelectorAll("#nota-picker button").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const nota = parseInt(btn.dataset.valor, 10);
-      const mensagem = document.getElementById("mensagem");
 
       try {
         const resposta = await fetch("/avaliacoes/totem", {
@@ -30,16 +30,15 @@
         });
 
         if (resposta.ok) {
-          mensagem.className = "mensagem sucesso";
-          mensagem.textContent = "Obrigado pela sua avaliação!";
+          mostrarToast("Obrigado pela sua avaliação!", "sucesso");
         } else {
-          mensagem.className = "mensagem erro";
-          mensagem.textContent = "Não foi possível registrar. Tente novamente.";
+          mostrarToast("Não foi possível registrar. Tente novamente.", "erro");
         }
       } catch (e) {
-        mensagem.className = "mensagem erro";
-        mensagem.textContent = "Erro de conexão.";
+        mostrarToast("Erro de conexão.", "erro");
       }
+
+      setTimeout(() => estrelas.reset(), 400);
     });
   });
 </script>

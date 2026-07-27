@@ -134,6 +134,23 @@ implementação, engenharia de dados e documentação.
   injetada no HTML renderizado só é apropriada porque essas telas rodam
   no ambiente interno da empresa fictícia (ADR-007) — se o Formulário Web
   virasse público na internet, esse padrão precisaria mudar.
+- **Proposta de login individual avaliada e adiada conscientemente** — o
+  autor pediu uma tela de login que autentica o operador e distribui a
+  API Key. A IA apontou que isso exigiria uma tabela de
+  usuários/operadores agora, antecipando parte da entidade `Funcionários`
+  (fora de escopo até ser modelada oficialmente, ver ADR-002), e ofereceu
+  duas opções (usuário/senha único vs. tabela de operadores). O autor
+  optou por adiar todo esse ponto para a Fase 10 (Melhorias), mantendo a
+  API Key (ADR-007) como suficiente por ora — registrado em `status.md`
+  para não ser reconsiderado sem pedido explícito.
+- **Melhorias de UI implementadas** (as duas que não exigiam decisão de
+  arquitetura, diferente do login): nota trocada de botões numéricos para
+  um picker de estrelas com animação de seleção, e a mensagem de
+  sucesso/erro trocada de um bloco inline (que passava despercebido em
+  envios seguidos rápidos, ex. Pinpad/Totem) para um toast fixo no topo
+  da tela, com animação de entrada/saída — reutilizados via
+  `src/static/app.js` em todas as 4 telas. Adicionada também uma tela de
+  navegação (`/`) listando as 4 origens.
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada
