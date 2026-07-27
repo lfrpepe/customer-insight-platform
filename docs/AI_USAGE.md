@@ -183,6 +183,19 @@ implementação, engenharia de dados e documentação.
   Rótulo da nota simplificado de "Nota (dígito do IVR)" para "Nota
   digitada pelo cliente", mais claro para quem não conhece o jargão de
   telemarketing.
+- **Ajustes finais da Fase 5 conduzidos pelo autor, com orientação técnica
+  da IA (sem edição direta de código)** — a IA explicou o raciocínio e o
+  autor implementou:
+  - Máscara de CPF, replicando o padrão já usado para telefone
+  - Bug de mensagens de erro exibindo `[object Object]`: causa raiz
+    identificada (FastAPI devolve `detail` como string em erros manuais,
+    mas como lista de objetos em erros de validação do Pydantic) e
+    corrigida com uma função que normaliza os dois formatos
+  - Troca do `<select>` de cliente no simulador de Telemarketing por
+    `<input>` + `<datalist>` (permite digitar/filtrar); ajuste
+    consequente para resolver o `id_cliente` a partir do `data-id` da
+    opção escolhida, já que o valor do campo deixou de ser o ID
+    diretamente
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada

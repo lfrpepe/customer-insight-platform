@@ -275,6 +275,22 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
   (`crud/avaliacoes.py::listar_clientes`) — demonstra o round-trip real
   em vez de pedir um ID decorado. Texto da nota simplificado para "Nota
   digitada pelo cliente".
+- [x] Ajustes finais implementados pelo próprio autor (com orientação da
+  IA, sem edição direta de código pela IA):
+  - Máscara visual de CPF (`XXX.XXX.XXX-XX`) via `aplicarMascaraCPF()` em
+    `app.js`, mesmo padrão já existente para telefone
+  - Correção do bug `[object Object]` nas mensagens de erro: FastAPI
+    devolve `detail` como string (erro lançado manualmente) ou como lista
+    de objetos (erro de validação do Pydantic) — `extrairMensagemErro()`
+    trata os dois casos antes de exibir no toast
+  - Simulador de Telemarketing: campo de cliente trocado de `<select>`
+    para `<input>` + `<datalist>` (permite digitar/filtrar); função
+    `idClienteSelecionado()` resolve o `id_cliente` a partir do
+    `data-id` da opção que bate com o texto digitado, já que o valor do
+    input passou a ser o texto exibido, não mais o ID diretamente
+- [x] **Fase 5 (Backend) encerrada.** Retomar as 4 telas HTML no futuro
+  (polimento visual adicional) é uma melhoria em aberto, sem urgência —
+  não bloqueia o início da Fase 6.
 
 ## Itens adiados conscientemente para fases futuras
 
