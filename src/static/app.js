@@ -31,6 +31,28 @@ function mostrarToast(mensagem, tipo) {
 }
 
 /**
+ * Aplica máscara visual "(DDD) NNNNN-NNNN" enquanto o usuário digita.
+ * É só formatação de exibição — o backend recebe o valor e normaliza para
+ * somente dígitos de qualquer forma (ver validators/cliente.py), então
+ * não há necessidade de "desfazer" a máscara antes de enviar.
+ */
+function aplicarMascaraTelefone(inputId) {
+  const input = document.getElementById(inputId);
+  input.addEventListener("input", () => {
+    const digitos = input.value.replace(/\D/g, "").slice(0, 11);
+    let formatado = digitos;
+
+    if (digitos.length > 2 && digitos.length <= 7) {
+      formatado = `(${digitos.slice(0, 2)}) ${digitos.slice(2)}`;
+    } else if (digitos.length > 7) {
+      formatado = `(${digitos.slice(0, 2)}) ${digitos.slice(2, 7)}-${digitos.slice(7)}`;
+    }
+
+    input.value = formatado;
+  });
+}
+
+/**
  * Configura um picker de 1 a 5 estrelas dentro do elemento com o id
  * informado. Hover ilumina até a estrela sobrevoada; clique fixa a
  * seleção e dispara a animação de "pop".

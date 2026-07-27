@@ -10,7 +10,7 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-from src.validators.cliente import cpf_valido, telefone_normalizado
+from src.validators.cliente import cpf_valido, nome_completo_valido, telefone_normalizado
 
 
 class AvaliacaoFormularioWebCreate(BaseModel):
@@ -21,6 +21,12 @@ class AvaliacaoFormularioWebCreate(BaseModel):
     categoria: str
     nota: int = Field(ge=1, le=5)
     comentario: Optional[str] = None
+
+    @field_validator("nome_cliente")
+    @classmethod
+    def valida_nome(cls, v: str) -> str:
+        """Exige nome e sobrenome, sem números — ver validators/cliente.py."""
+        return nome_completo_valido(v)
 
     @field_validator("cpf")
     @classmethod

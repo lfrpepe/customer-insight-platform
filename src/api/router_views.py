@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.templating import Jinja2Templates
 from pg8000.dbapi import Connection
 
-from src.crud.avaliacoes import listar_categorias
+from src.crud.avaliacoes import listar_categorias, listar_clientes
 from src.database.connection import get_connection
 
 router = APIRouter(tags=["Telas"])
@@ -57,4 +57,5 @@ def tela_totem(request: Request):
 def tela_telemarketing_simulador(request: Request, conn: Connection = Depends(get_connection)):
     contexto = _contexto_base(request)
     contexto["categorias"] = listar_categorias(conn)
+    contexto["clientes"] = listar_clientes(conn)
     return templates.TemplateResponse("telemarketing_simulador.html", contexto)

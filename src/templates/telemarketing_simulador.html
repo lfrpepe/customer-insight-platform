@@ -12,8 +12,13 @@
     aqui (ver <code>ADR-004</code>). Esta tela existe só para demonstração.
   </p>
 
-  <label for="id_cliente">ID do cliente</label>
-  <input type="number" id="id_cliente" required min="1" placeholder="ex.: consulte SELECT id_cliente FROM clientes LIMIT 5;">
+  <label for="cliente_select">Cliente</label>
+  <select id="cliente_select" required>
+    <option value="" disabled selected>Selecione</option>
+    {% for c in clientes %}
+    <option value="{{ c.id_cliente }}">{{ c.nome }} — CPF {{ c.cpf_formatado }}</option>
+    {% endfor %}
+  </select>
 
   <label for="categoria_select">Categoria</label>
   <select id="categoria_select" required>
@@ -23,7 +28,7 @@
     {% endfor %}
   </select>
 
-  <label>Nota (dígito do IVR)</label>
+  <label>Nota digitada pelo cliente</label>
   <div class="estrela-picker" id="nota-picker">
     {% for n in range(1, 6) %}
     <button type="button" data-valor="{{ n }}" aria-label="{{ n }} estrela(s)">
@@ -40,11 +45,11 @@
   const estrelas = configurarEstrelas("nota-picker");
 
   document.getElementById("btn-enviar").addEventListener("click", async () => {
-    const idCliente = parseInt(document.getElementById("id_cliente").value, 10);
+    const idCliente = parseInt(document.getElementById("cliente_select").value, 10);
     const idCategoria = parseInt(document.getElementById("categoria_select").value, 10);
 
     if (!idCliente || !idCategoria || !estrelas.valor) {
-      mostrarToast("Preencha o ID do cliente, a categoria e a nota.", "erro");
+      mostrarToast("Selecione o cliente, a categoria e a nota.", "erro");
       return;
     }
 
@@ -58,6 +63,8 @@
       if (resposta.ok) {
         mostrarToast("Simulação registrada com sucesso.", "sucesso");
         estrelas.reset();
+        document.getElementById("cliente_select").selectedIndex = 0;
+        document.getElementById("categoria_select").selectedIndex = 0;
       } else {
         const erro = await resposta.json();
         mostrarToast(erro.detail || "Não foi possível registrar.", "erro");

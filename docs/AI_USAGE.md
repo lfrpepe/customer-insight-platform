@@ -168,6 +168,21 @@ implementação, engenharia de dados e documentação.
   cabeçalho de marca fixo (`.topbar`) presente em todas as telas, e o
   painel inicial (`/`) redesenhado de lista de links para grid de cards
   com tag de categoria — mais próximo de um painel de operação real.
+- **Reforço de validações a pedido do autor** — nome do cliente passou a
+  exigir nome + sobrenome e rejeitar números (antes aceitava qualquer
+  string); telefone passou a validar contra a lista real de DDDs
+  brasileiros, exigir o dígito "9" do celular e rejeitar sequências de
+  dígitos repetidos (evita números obviamente falsos digitados às
+  pressas em teste). Adicionada também máscara visual de telefone
+  (`(DDD) NNNNN-NNNN`) enquanto o usuário digita.
+- **Simulador de Telemarketing: cliente por seleção, não por ID digitado**
+  — o autor apontou que digitar o `id_cliente` manualmente não demonstra
+  a busca real no banco. Adicionado `listar_clientes()` em
+  `crud/avaliacoes.py` e um novo `<select>` de clientes (nome + CPF
+  formatado) na tela, populado a partir de uma consulta real ao Supabase.
+  Rótulo da nota simplificado de "Nota (dígito do IVR)" para "Nota
+  digitada pelo cliente", mais claro para quem não conhece o jargão de
+  telemarketing.
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada

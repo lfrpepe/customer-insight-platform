@@ -264,6 +264,17 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
   corporativo (`#0F45A8`), fonte Inter, cabeçalho de marca fixo em todas
   as telas (`.topbar`), painel inicial (`/`) redesenhado como grid de
   cards em vez de lista de links simples.
+- [x] Validações reforçadas no Formulário Web: nome exige nome + sobrenome
+  e rejeita números (`validators/cliente.py::nome_completo_valido`);
+  telefone agora confere DDD contra lista real de DDDs brasileiros, exige
+  o "9" do celular e rejeita dígitos repetidos (evita número óbvio
+  inventado), além de ganhar máscara visual `(DDD) NNNNN-NNNN` ao digitar
+  (`src/static/app.js::aplicarMascaraTelefone`).
+- [x] Simulador de Telemarketing: campo "ID do cliente" (digitado)
+  trocado por um `<select>` de clientes reais buscados no banco
+  (`crud/avaliacoes.py::listar_clientes`) — demonstra o round-trip real
+  em vez de pedir um ID decorado. Texto da nota simplificado para "Nota
+  digitada pelo cliente".
 
 ## Itens adiados conscientemente para fases futuras
 

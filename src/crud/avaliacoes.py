@@ -41,6 +41,26 @@ def listar_categorias(conn: Connection) -> list[dict]:
         return [{"id_categoria": row[0], "nome": row[1]} for row in cur.fetchall()]
 
 
+def listar_clientes(conn: Connection, limite: int = 300) -> list[dict]:
+    """
+    Lista clientes (id + nome + CPF formatado), para o simulador de
+    Telemarketing mostrar um <select> de clientes reais — em vez de pedir
+    o id_cliente digitado manualmente, demonstra o round-trip de verdade
+    até o banco. Limitado a `limite` para não sobrecarregar o <select> em
+    bases grandes; ordenado por nome.
+    """
+    with conn.cursor() as cur:
+        cur.execute("SELECT id_cliente, nome, cpf FROM clientes ORDER BY nome LIMIT %s", (limite,))
+        return [
+            {
+                "id_cliente": row[0],
+                "nome": row[1],
+                "cpf_formatado": f"{row[2][:3]}.{row[2][3:6]}.{row[2][6:9]}-{row[2][9:]}",
+            }
+            for row in cur.fetchall()
+        ]
+
+
 def verificar_cliente_existe(conn: Connection, id_cliente: int) -> None:
     """
     Usado pelo Telemarketing: diferente do Formulário Web (que recebe CPF e
