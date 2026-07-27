@@ -122,6 +122,18 @@ implementação, engenharia de dados e documentação.
   [ADR 007](decisions/007-autenticacao-api-key.md). Implementada como
   dependência única do FastAPI (`src/security/api_key.py`), aplicada
   centralizadamente no `main.py` em vez de repetida em cada router.
+- **Templates HTML das 4 origens, com correção de expectativa sobre o
+  Telemarketing** — ao planejar a tela do Telemarketing, a IA apontou que
+  essa origem é uma integração de sistema (ADR-004), não uma tela operada
+  por pessoa, e ofereceu duas opções: seguir só com a API (mais fiel ao
+  cenário real) ou construir uma tela rotulada como "simulador de
+  integração" para fins de demonstração no portfólio. O autor escolheu a
+  segunda opção; a tela foi construída com aviso explícito de que
+  representa o CRM/discador chamando a API automaticamente, não um
+  atendente. Também identificado e sinalizado no código: a chave de API
+  injetada no HTML renderizado só é apropriada porque essas telas rodam
+  no ambiente interno da empresa fictícia (ADR-007) — se o Formulário Web
+  virasse público na internet, esse padrão precisaria mudar.
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada

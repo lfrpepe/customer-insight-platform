@@ -34,6 +34,13 @@ def buscar_id_categoria(conn: Connection, nome_categoria: str) -> int:
         return row[0]
 
 
+def listar_categorias(conn: Connection) -> list[dict]:
+    """Lista id + nome de todas as categorias, para popular os <select> das telas HTML."""
+    with conn.cursor() as cur:
+        cur.execute("SELECT id_categoria, nome FROM categorias ORDER BY nome")
+        return [{"id_categoria": row[0], "nome": row[1]} for row in cur.fetchall()]
+
+
 def verificar_cliente_existe(conn: Connection, id_cliente: int) -> None:
     """
     Usado pelo Telemarketing: diferente do Formulário Web (que recebe CPF e

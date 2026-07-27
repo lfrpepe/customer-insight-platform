@@ -64,7 +64,15 @@ Power BI              (dashboards executivos)
 ## Estrutura do repositório
 
 ```
-src/            código-fonte modular (api, crud, database, etl, scraping, ml, etc.)
+src/
+├── api/          routers FastAPI (POST de Create + GET das telas HTML) e main.py
+├── crud/         lógica de escrita/leitura no banco, ponto único por entidade
+├── database/     conexão pg8000 e scripts (seed de desenvolvimento)
+├── schemas/      validação Pydantic, um schema por origem de avaliação
+├── security/     autenticação via API Key (ver ADR-007)
+├── validators/   regras de negócio que o Pydantic não cobre (CPF, telefone)
+├── templates/    telas HTML (Jinja2) — Formulário Web, Pinpad, Totem, simulador de Telemarketing
+└── static/       CSS compartilhado pelas telas
 docs/           documentação técnica e decisões de arquitetura (ADRs)
 notebooks/      notebooks de exploração e ETL (Databricks)
 tests/          testes automatizados
@@ -81,9 +89,18 @@ venv\Scripts\Activate.ps1        # Windows (PowerShell)
 # source venv/bin/activate       # Mac/Linux
 
 pip install -r requirements.txt
-cp .env.example .env             # preencher com credenciais reais do Supabase
+cp .env.example .env             # preencher com credenciais do Supabase e uma API_KEY própria
 python src/database/scripts/generate_seed_dev.py
 ```
+
+Para rodar o backend (FastAPI):
+
+```bash
+uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+- Docs interativas (Swagger): `/docs`
+- Telas HTML: `/formulario-web`, `/pinpad`, `/totem`, `/telemarketing-simulador`
 
 **Nota:** conexão direta ao banco (porta 5432) pode ser bloqueada por redes
 corporativas restritivas — nesse caso, use

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Totem — Avaliação{% endblock %}
+{% block content %}
+<div class="card" style="text-align: center;">
+  <p class="eyebrow">Autoatendimento</p>
+  <h1>Avalie seu atendimento</h1>
+
+  <div class="nota-picker" id="nota-picker" style="margin-top: 12px;">
+    {% for n in range(1, 6) %}
+    <button type="button" data-valor="{{ n }}" style="padding: 24px 0; font-size: 24px;">{{ n }}</button>
+    {% endfor %}
+  </div>
+
+  <div class="mensagem" id="mensagem"></div>
+</div>
+
+<script>
+  const API_KEY = "{{ api_key }}";
+
+  document.querySelectorAll("#nota-picker button").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const nota = parseInt(btn.dataset.valor, 10);
+      const mensagem = document.getElementById("mensagem");
+
+      try {
+        const resposta = await fetch("/avaliacoes/totem", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-API-Key": API_KEY },
+          body: JSON.stringify({ nota }),
+        });
+
+        if (resposta.ok) {
+          mensagem.className = "mensagem sucesso";
+          mensagem.textContent = "Obrigado pela sua avaliação!";
+        } else {
+          mensagem.className = "mensagem erro";
+          mensagem.textContent = "Não foi possível registrar. Tente novamente.";
+        }
+      } catch (e) {
+        mensagem.className = "mensagem erro";
+        mensagem.textContent = "Erro de conexão.";
+      }
+    });
+  });
+</script>
+{% endblock %}

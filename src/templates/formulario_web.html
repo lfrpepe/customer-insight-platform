@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Formulário Web — Avaliação{% endblock %}
+{% block content %}
+<div class="card">
+  <p class="eyebrow">Customer Insight Platform</p>
+  <h1>Avalie o atendimento que você recebeu</h1>
+
+  <form id="form-avaliacao">
+    <label for="nome_cliente">Nome</label>
+    <input type="text" id="nome_cliente" required maxlength="150">
+
+    <label for="cpf">CPF</label>
+    <input type="text" id="cpf" required placeholder="000.000.000-00">
+
+    <label for="email">E-mail (opcional)</label>
+    <input type="email" id="email">
+
+    <label for="telefone">Telefone (opcional)</label>
+    <input type="text" id="telefone" placeholder="(11) 98765-4321">
+
+    <label for="categoria">Categoria do atendimento</label>
+    <select id="categoria" required>
+      <option value="" disabled selected>Selecione</option>
+      {% for c in categorias %}
+      <option value="{{ c.nome }}">{{ c.nome }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Nota</label>
+    <div class="nota-picker" id="nota-picker">
+      {% for n in range(1, 6) %}
+      <button type="button" data-valor="{{ n }}">{{ n }}</button>
+      {% endfor %}
+    </div>
+
+    <label for="comentario">Comentário (opcional)</label>
+    <textarea id="comentario" maxlength="1000"></textarea>
+
+    <button type="submit" class="btn-enviar">Enviar avaliação</button>
+  </form>
+
+  <div class="mensagem" id="mensagem"></div>
+</div>
+
+<script>
+  // Chave injetada pelo servidor (Jinja2, a partir do .env) — válida
+  // porque esta tela roda no ambiente interno da empresa, não na
+  // internet pública (ver ADR-007). Se este formulário virar público,
+  // esse padrão precisa mudar para outro modelo de proteção.
+  const API_KEY = "{{ api_key }}";
+  let notaSelecionada = null;
+
+  document.querySelectorAll("#nota-picker button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#nota-picker button").forEach((b) => b.classList.remove("selecionada"));
+      btn.classList.add("selecionada");
+      notaSelecionada = parseInt(btn.dataset.valor, 10);
+    });
+  });
+
+  document.getElementById("form-avaliacao").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const mensagem = document.getElementById("mensagem");
+    mensagem.className = "mensagem";
+    mensagem.textContent = "";
+
+    if (!notaSelecionada) {
+      mensagem.className = "mensagem erro";
+      mensagem.textContent = "Selecione uma nota de 1 a 5.";
+      return;
+    }
+
+    const payload = {
+      nome_cliente: document.getElementById("nome_cliente").value,
+      cpf: document.getElementById("cpf").value,
+      email: document.getElementById("email").value || null,
+      telefone: document.getElementById("telefone").value || null,
+      categoria: document.getElementById("categoria").value,
+      nota: notaSelecionada,
+      comentario: document.getElementById("comentario").value || null,
+    };
+
+    try {
+      const resposta = await fetch("/avaliacoes/formulario-web", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-API-Key": API_KEY },
+        body: JSON.stringify(payload),
+      });
+
+      if (resposta.ok) {
+        mensagem.className = "mensagem sucesso";
+        mensagem.textContent = "Avaliação registrada. Obrigado pelo retorno!";
+        document.getElementById("form-avaliacao").reset();
+        document.querySelectorAll("#nota-picker button").forEach((b) => b.classList.remove("selecionada"));
+        notaSelecionada = null;
+      } else {
+        const erro = await resposta.json();
+        mensagem.className = "mensagem erro";
+        mensagem.textContent = erro.detail || "Não foi possível registrar a avaliação.";
+      }
+    } catch (e) {
+      mensagem.className = "mensagem erro";
+      mensagem.textContent = "Erro de conexão. Tente novamente.";
+    }
+  });
+</script>
+{% endblock %}

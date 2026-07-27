@@ -1,9 +1,9 @@
 # Status do Projeto — Customer Insight Platform
 
-**Última atualização:** 2026-07-24
+**Última atualização:** 2026-07-27
 **Fases concluídas:** 1 (Arquitetura), 2 (Modelagem de Dados), 3 (Estrutura
-do Repositório), 4 (Banco de Dados)
-**Próxima fase:** 5 — Backend (FastAPI, Pinpad/Totem, integração Telemarketing)
+do Repositório), 4 (Banco de Dados), 5 (Backend)
+**Próxima fase:** 6 — ETL (Databricks, camadas Bronze/Silver/Gold)
 
 > Nota sobre numeração: as seções abaixo agrupam os passos 1-2 (Arquitetura
 > + Modelagem de Dados) e 3-4 (Estrutura do Repositório + Banco de Dados)
@@ -208,7 +208,7 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
 | Scraping de fontes como Reclame Aqui (ToS) | Ainda não avaliado — a validar na Fase de Ingestão |
 | Rede corporativa bloqueia porta 5432 (Postgres) para conexões locais | **Confirmado e mitigado** — uso de GitHub Codespaces para qualquer script com conexão direta ao banco |
 
-## Próximos passos (Fase 5 — Backend)
+## Fase 5 — Backend (Concluída)
 
 - [x] Framework de backend definido: **FastAPI** (não Flask) — ver ADR-006
 - [x] Tecnologia da interface Pinpad/Totem definida: rota dedicada no mesmo
@@ -240,7 +240,22 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
 - [x] Autenticação via API Key adicionada nas 4 rotas (ver ADR-007) —
   `src/security/api_key.py`, aplicada centralizadamente no `main.py`;
   nova variável `API_KEY` no `.env`/`.env.example`.
-- [ ] Templates HTML (Jinja2) para Formulário Web, Pinpad e Totem — rotas
-  já existem, faltam as telas
-- [ ] Interface de Pinpad/Totem, com seleção de modo
-- [ ] Integração com sistema de Telemarketing (pesquisa pós-atendimento)
+- [x] Templates HTML (Jinja2) implementados para as 4 origens:
+  `formulario_web.html`, `pinpad.html`, `totem.html` (telas reais) e
+  `telemarketing_simulador.html` (rotulada como simulador de integração —
+  Telemarketing não tem tela real, é o CRM/discador chamando a API
+  sozinho, ver ADR-004). Servidos via `src/api/router_views.py` (GET,
+  sem exigir API Key — só os POSTs de Create são autenticados). CSS
+  compartilhado em `src/static/styles.css`.
+- [x] Fase 5 (Backend) concluída: 4 rotas de Create testadas, autenticadas
+  e com tela HTML correspondente.
+
+## Próximos passos (Fase 6 — ETL)
+
+- [ ] Definir estratégia de ingestão Postgres → Databricks Bronze (batch
+  agendado vs. sob demanda)
+- [ ] Materializar Bronze como Delta Table, sem transformação (ver
+  `architecture.md`)
+- [ ] Planejar Silver: padronização, limpeza, enriquecimento, análise de
+  sentimento (Formulário Web e Scraping, únicas origens com comentário)
+
