@@ -50,6 +50,12 @@ do Repositório), 4 (Banco de Dados)
   validação nativa via Pydantic, documentação automática (OpenAPI/Swagger)
   e maior demanda de mercado — sem perda funcional para o escopo do
   projeto.
+- **ADR 007** — Autenticação via API Key (header `X-API-Key`) nas 4 rotas
+  de Create, implementada como dependência do FastAPI
+  (`src/security/api_key.py`). Não há entidade de usuário/login no
+  projeto, então API Key simples foi preferida a OAuth2/JWT (que exigiria
+  modelar usuários sem necessidade real ainda) e a HTTP Basic Auth (menos
+  adequado a integrações de sistema, não pessoas logando).
 
 ## Decisões de ambiente (não formalizadas como ADR, mas relevantes)
 
@@ -231,6 +237,9 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
   `verificar_categoria_existe` em `crud/avaliacoes.py`, chamados antes do
   insert no `router_telemarketing.py`; agora devolve `422` legível, igual
   aos demais routers.
+- [x] Autenticação via API Key adicionada nas 4 rotas (ver ADR-007) —
+  `src/security/api_key.py`, aplicada centralizadamente no `main.py`;
+  nova variável `API_KEY` no `.env`/`.env.example`.
 - [ ] Templates HTML (Jinja2) para Formulário Web, Pinpad e Totem — rotas
   já existem, faltam as telas
 - [ ] Interface de Pinpad/Totem, com seleção de modo

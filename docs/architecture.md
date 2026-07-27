@@ -79,6 +79,15 @@ Ambos gravam diretamente na tabela `avaliacoes`, reaproveitando o mesmo
 módulo `database/connection.py` do backend — não é um serviço separado com
 banco próprio.
 
+## Autenticação do backend
+
+Todas as rotas de Create (Formulário Web, Pinpad, Totem, Telemarketing)
+exigem um header `X-API-Key`, conferido contra a variável de ambiente
+`API_KEY` — ver [ADR 007](decisions/007-autenticacao-api-key.md). Não é um
+sistema de login (não há entidade de usuário no projeto): é uma chave
+única por integração, adequada ao escopo atual e sem a complexidade de
+modelar OAuth2/JWT sem um conceito de usuário definido.
+
 ## Por que Postgres não é a camada Bronze
 
 Um ponto importante, corrigido ainda na fase de planejamento: o PostgreSQL

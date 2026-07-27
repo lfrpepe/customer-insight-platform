@@ -113,6 +113,15 @@ implementação, engenharia de dados e documentação.
   `verificar_categoria_existe`) antes do `INSERT`, devolvendo `422` com
   mensagem legível — mesmo padrão de tratamento já usado nos outros 3
   routers.
+- **Adição de camada de autenticação (API Key)** — a pedido do autor, após
+  as 4 rotas estarem testadas e funcionando sem nenhuma proteção de
+  acesso. Como o projeto não tem entidade de usuário/login, a IA avaliou
+  as alternativas (API Key vs. OAuth2/JWT completo vs. HTTP Basic Auth) e
+  recomendou API Key por ser proporcional ao escopo atual — decisão
+  confirmada pelo autor e registrada em
+  [ADR 007](decisions/007-autenticacao-api-key.md). Implementada como
+  dependência única do FastAPI (`src/security/api_key.py`), aplicada
+  centralizadamente no `main.py` em vez de repetida em cada router.
 - **Geração e revisão de documentação técnica** (ADRs, arquitetura, modelo de
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada

@@ -21,7 +21,7 @@ evolutiva (permite crescer em funcionalidades sem reestruturação).
 |---|---|---|
 | Banco operacional (OLTP) | PostgreSQL (Supabase) | Armazena dados brutos de origem |
 | Engenharia de Dados | Databricks Free Edition + Apache Spark | ETL, Bronze/Silver/Gold, Machine Learning |
-| Backend / Cadastro | FastAPI | Cadastro de avaliações com validações — apenas *Create* (ver [ADR 006](docs/decisions/006-fastapi-em-vez-de-flask.md)) |
+| Backend / Cadastro | FastAPI | Cadastro de avaliações com validações — apenas *Create* (ver [ADR 006](docs/decisions/006-fastapi-em-vez-de-flask.md)); rotas protegidas por API Key (ver [ADR 007](docs/decisions/007-autenticacao-api-key.md)) |
 | Ingestão | Web Scraping + Pinpad + Totem + Telemarketing + APIs Públicas | Múltiplas fontes de dados, com níveis de estrutura diferentes |
 | BI | Power BI | Dashboards executivos sobre a camada Gold |
 | Versionamento | GitHub + GitHub Actions | Código, documentação, automação |
