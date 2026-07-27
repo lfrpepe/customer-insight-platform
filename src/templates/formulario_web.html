@@ -50,7 +50,7 @@
   // esse padrão precisa mudar para outro modelo de proteção.
   const API_KEY = "{{ api_key }}";
   const estrelas = configurarEstrelas("nota-picker");
-  aplicarMascaraTelefone("telefone");
+  aplicarMascaraTelefone("telefone");aplicarMascaraCPF("cpf");
 
   document.getElementById("form-avaliacao").addEventListener("submit", async (evento) => {
     evento.preventDefault();
@@ -83,7 +83,7 @@
         estrelas.reset();
       } else {
         const erro = await resposta.json();
-        mostrarToast(erro.detail || "Não foi possível registrar a avaliação.", "erro");
+        mostrarToast(extrairMensagemErro(erro.detail) || "Não foi possível registrar.", "erro");
       }
     } catch (e) {
       mostrarToast("Erro de conexão. Tente novamente.", "erro");

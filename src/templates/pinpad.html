@@ -45,12 +45,12 @@
       });
 
       if (resposta.ok) {
-        mostrarToast("Avaliação registrada. Próximo cliente, por favor.", "sucesso");
+        mostrarToast("Avaliação registrada.", "sucesso");
         document.getElementById("categoria").selectedIndex = 0;
         estrelas.reset();
       } else {
         const erro = await resposta.json();
-        mostrarToast(erro.detail || "Não foi possível registrar.", "erro");
+        mostrarToast(extrairMensagemErro(erro.detail) || "Não foi possível registrar.", "erro");
       }
     } catch (e) {
       mostrarToast("Erro de conexão.", "erro");

@@ -52,6 +52,36 @@ function aplicarMascaraTelefone(inputId) {
   });
 }
 
+function aplicarMascaraCPF(inputId) {
+  const input = document.getElementById(inputId);
+  input.addEventListener("input", () => {
+    const digitos = input.value.replace(/\D/g, "").slice(0, 11);
+    let formatado = digitos;
+
+    if (digitos.length > 3) {
+      formatado = `${digitos.slice(0, 3)}.${digitos.slice(3)}`;
+    }
+    if (digitos.length > 6) {
+      formatado = `${digitos.slice(0, 3)}.${digitos.slice(3, 6)}.${digitos.slice(6)}`;
+    }
+    if (digitos.length > 9) {
+      formatado = `${digitos.slice(0, 3)}.${digitos.slice(3, 6)}.${digitos.slice(6, 9)}-${digitos.slice(9)}`;
+    }
+
+    input.value = formatado;
+  });
+}
+
+function extrairMensagemErro(detalhe) {
+  if (typeof detalhe === "string") {
+    return detalhe;
+  }
+  if (Array.isArray(detalhe)) {
+    return detalhe.map((item) => item.msg).join(" ");
+  }
+  return "Não foi possível processar a solicitação.";
+}
+
 /**
  * Configura um picker de 1 a 5 estrelas dentro do elemento com o id
  * informado. Hover ilumina até a estrela sobrevoada; clique fixa a

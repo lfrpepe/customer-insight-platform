@@ -13,12 +13,12 @@
   </p>
 
   <label for="cliente_select">Cliente</label>
-  <select id="cliente_select" required>
-    <option value="" disabled selected>Selecione</option>
+  <input type="text" id="cliente_select" list="lista-clientes" placeholder="Digite o nome do cliente" autocomplete="off">
+  <datalist id="lista-clientes">
     {% for c in clientes %}
-    <option value="{{ c.id_cliente }}">{{ c.nome }} — CPF {{ c.cpf_formatado }}</option>
+    <option value="{{ c.nome }} — CPF {{ c.cpf_formatado }}" data-id="{{ c.id_cliente }}">
     {% endfor %}
-  </select>
+  </datalist>
 
   <label for="categoria_select">Categoria</label>
   <select id="categoria_select" required>
@@ -43,9 +43,19 @@
 <script>
   const API_KEY = "{{ api_key }}";
   const estrelas = configurarEstrelas("nota-picker");
+  function idClienteSelecionado() {
+  const texto = document.getElementById("cliente_select").value;
+  const opcoes = document.querySelectorAll("#lista-clientes option");
+  for (const opcao of opcoes) {
+    if (opcao.value === texto) {
+      return parseInt(opcao.dataset.id, 10);
+    }
+  }
+  return null; // texto digitado não bate com nenhuma opção da lista
+}
 
   document.getElementById("btn-enviar").addEventListener("click", async () => {
-    const idCliente = parseInt(document.getElementById("cliente_select").value, 10);
+    const idCliente = idClienteSelecionado();
     const idCategoria = parseInt(document.getElementById("categoria_select").value, 10);
 
     if (!idCliente || !idCategoria || !estrelas.valor) {
@@ -67,7 +77,7 @@
         document.getElementById("categoria_select").selectedIndex = 0;
       } else {
         const erro = await resposta.json();
-        mostrarToast(erro.detail || "Não foi possível registrar.", "erro");
+        mostrarToast(extrairMensagemErro(erro.detail) || "Não foi possível registrar.", "erro");
       }
     } catch (e) {
       mostrarToast("Erro de conexão.", "erro");

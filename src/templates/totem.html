@@ -32,7 +32,7 @@
         if (resposta.ok) {
           mostrarToast("Obrigado pela sua avaliação!", "sucesso");
         } else {
-          mostrarToast("Não foi possível registrar. Tente novamente.", "erro");
+          mostrarToast(extrairMensagemErro(erro.detail) || "Não foi possível registrar.", "erro");
         }
       } catch (e) {
         mostrarToast("Erro de conexão.", "erro");
