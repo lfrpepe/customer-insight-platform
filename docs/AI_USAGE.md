@@ -210,7 +210,6 @@ implementação, engenharia de dados e documentação.
   dados, status do projeto, README), mantida atualizada a cada decisão relevante —
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada
   discussão técnica gerava uma mudança real no schema ou na estratégia.
-
 - **Debugging da primeira execução real do Job de ingestão Bronze** — as
   6 tabelas quase carregaram na primeira tentativa; `avaliacoes` falhou
   na etapa final (atualização do watermark), com erro
@@ -225,6 +224,69 @@ implementação, engenharia de dados e documentação.
   Aproveitado o mesmo ajuste para separar, no resumo da execução, "dados
   carregados" de "watermark não persistido", evitando reportar `0
   linhas` quando a carga real havia funcionado.
+- **Decisão de conformidade legal para o scraping** — ao planejar a
+  implementação real do scraper (Fase 6), a IA levantou proativamente a
+  questão de Termos de Uso e LGPD para scraping de sites reais de
+  avaliação (ex.: Reclame Aqui), antes de escrever qualquer código de
+  coleta. Decisão registrada em
+  [ADR 010](decisions/010-scraping-fonte-simulada.md): scraper real
+  (`requests` + `BeautifulSoup`) rodando contra páginas HTML fixture
+  versionadas no próprio repositório, não contra um site real.
+- **Camada de gravação do scraper desacoplada do backend, a pedido do
+  autor** — a IA propôs inicialmente que o scraper reaproveitasse
+  `crud/avaliacoes.py` (import direto, como o `generate_seed_dev.py`); o
+  autor pediu isolamento total, sem reaproveitar nenhum código do
+  backend, simulando um job de scraping rodando fora do codebase da
+  aplicação principal. Único ponto de contato mantido: o processo
+  `uvicorn` já em execução serve as páginas fixture via `StaticFiles`,
+  para que o scraper faça requisição HTTP real. Registrado em
+  [ADR 011](decisions/011-scraper-gravacao-propria-desacoplada.md).
+- **Iteração de design do site de avaliações fixture, com correção
+  explícita do autor sobre uma proposta rejeitada** — a primeira versão
+  do site (páginas simples, link "próxima" solto) foi substituída, a
+  pedido do autor, por um design com paginação numerada, clique para ver
+  a avaliação completa, e visual mais moderno (JS liberado). Ao propor
+  formas de "dificultar a raspagem, como um cenário real", a IA sugeriu
+  uma variante com **templates HTML inconsistentes entre páginas**
+  (elemento decoy oculto com dado falso, atributo de nota ausente em
+  parte das avaliações, bloco de metadados alternando entre `<div>` e
+  `<dl>`). O autor **rejeitou essa abordagem explicitamente** ("as
+  páginas não podem ter elementos diferentes, tem que ser tudo igual") —
+  a versão final usa um **template único** em todas as 200 páginas de
+  detalhe, onde a única variação (bloco de "resolvido"/"voltaria a fazer
+  negócio") é condicionada ao dado real (`respondido`), não a uma
+  inconsistência estrutural. A dificuldade de raspagem passou a vir do
+  conteúdo (ver abaixo), não da estrutura.
+- **Conteúdo sintético desenhado para dificultar análise de sentimento,
+  de propósito** — a pedido do autor, ~10% dos comentários gerados têm
+  erro de português + palavrão censurado, e ~20% têm emojis, ambos
+  correlacionados ao sentimento da nota (positiva/neutra/negativa) para
+  não quebrar a coerência dos dados. Reações (útil/não útil) e o
+  indicador de "respondido pela empresa" (~85%) também foram adicionados
+  a pedido do autor; quando respondido, os campos "problema resolvido" e
+  "voltaria a fazer negócio" aparecem, correlacionados com a nota.
+- **Bug de UI relatado pelo autor e corrigido** — o botão de curtir/não
+  curtir (reações) somava a contagem indefinidamente a cada clique; a IA
+  corrigiu para um toggle simples (clicar marca e soma 1, clicar de novo
+  desfaz), eliminando o comportamento indevido sem precisar de estado
+  persistido.
+- **Decisão de escopo sobre o que o scraper realmente extrai** — como o
+  site fixture ganhou campos (reações, respondido, resolvido, voltaria)
+  que não existem no schema de `avaliacoes` (ADR-002), a IA identificou
+  essa lacuna proativamente e registrou em
+  [ADR 012](decisions/012-campos-nao-extraidos-scraping.md): o scraper
+  extrai apenas nota e comentário — os únicos campos que a origem
+  Scraping efetivamente popula — e trata os demais elementos do site como
+  ruído estrutural a ignorar, coerente com o propósito original desses
+  elementos (dificultar a raspagem/análise de sentimento, não enriquecer
+  o modelo).
+- **Renomeação de diretório a pedido do autor** — a pasta de fixtures
+  (`src/scraping/fixtures/paginas_html/`) foi renomeada para `reviews/`,
+  para ficar consistente com o path público já usado
+  (`/fixtures/reviews/...`). Atualizado no gerador
+  (`gerar_fixtures_scraping.py`) e no mount do `main.py`
+  (`StaticFiles(directory=...)`) — sem mudança na URL pública, já que o
+  prefixo de rota é independente do nome da pasta no disco.
 
 ## O que não foi delegado
 
@@ -232,7 +294,8 @@ Todas as decisões arquiteturais foram avaliadas e compreendidas antes de serem
 adotadas — a IA propôs, questionou e explicou; a condução técnica, validação
 prática (contas, ambientes, testes reais), execução dos scripts no banco de
 dados real e as decisões finais (incluindo reverter um pivô de escopo
-proposto) são do autor.
+proposto, e rejeitar a proposta de templates HTML inconsistentes no site de
+scraping) são do autor.
 
 ## Por que documentar isso
 

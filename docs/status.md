@@ -1,6 +1,6 @@
 # Status do Projeto — Customer Insight Platform
 
-**Última atualização:** 2026-07-27
+**Última atualização:** 2026-07-28
 **Fases concluídas:** 1 (Arquitetura), 2 (Modelagem de Dados), 3 (Estrutura
 do Repositório), 4 (Banco de Dados), 5 (Backend)
 **Fase em andamento:** 6 — ETL (Databricks, camadas Bronze/Silver/Gold)
@@ -66,6 +66,18 @@ do Repositório), 4 (Banco de Dados), 5 (Backend)
   original da Fase 1 de usar GitHub Actions para orquestração de dados;
   GitHub Actions passa a ser usado apenas para CI (lint/testes do
   backend).
+- **ADR 010** — Scraping contra fonte simulada (páginas HTML fixture
+  versionadas no repositório), não contra um site de avaliações real —
+  por conformidade legal (Termos de Uso + LGPD), não limitação técnica.
+  O scraper em si é real (`requests` + `BeautifulSoup`).
+- **ADR 011** — Scraper com conexão e gravação próprias
+  (`src/scraping/conexao.py`, `gravacao.py`), desacoplado de
+  `crud/avaliacoes.py` e de qualquer módulo do backend — simula um job de
+  scraping rodando fora do codebase da aplicação principal.
+- **ADR 012** — Campos adicionais do site fixture (reações, respondido,
+  resolvido, voltaria) não são extraídos pelo scraper — fora do escopo do
+  schema atual de `avaliacoes` (ADR-002); tratados como ruído estrutural
+  proposital, não como dado a capturar.
 
 ## Decisões de ambiente (não formalizadas como ADR, mas relevantes)
 
@@ -219,7 +231,7 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
 | Databricks Free Edition bloquear acesso externo ao Supabase | **Descartado** — conectividade confirmada na PoC |
 | `psycopg2` incompatível com serverless do Databricks | **Identificado e mitigado** — ver ADR 001 |
 | Supabase free tier sem backup automático | Monitorado — mitigação via scripts de schema versionados no Git |
-| Scraping de fontes como Reclame Aqui (ToS) | Ainda não avaliado — a validar na Fase de Ingestão |
+| Scraping de fontes como Reclame Aqui (ToS) | **Avaliado e mitigado** — scraper roda contra fixtures HTML próprias, versionadas no repositório, não contra um site real (ver ADR-010) |
 | Rede corporativa bloqueia porta 5432 (Postgres) para conexões locais | **Confirmado e mitigado** — uso de GitHub Codespaces para qualquer script com conexão direta ao banco |
 
 ## Fase 5 — Backend (Concluída)
@@ -347,6 +359,49 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
   ajustado o resumo da execução para não reportar "0 linhas" quando os
   dados já tinham sido gravados e só o watermark falhou (evita mascarar
   sucesso parcial como falha total).
+- [x] **Scraping — decisão de conformidade legal (ADR-010):** scraper
+  real (`requests` + `BeautifulSoup`) roda contra páginas HTML fixture
+  versionadas no próprio repositório, não contra um site de avaliações
+  real (ex.: Reclame Aqui) — Termos de Uso proíbem scraping automatizado
+  e uma reclamação pública carrega dado pessoal sujeito à LGPD.
+- [x] **Scraping — camada de gravação própria (ADR-011):** scraper usa
+  conexão e INSERT próprios (`src/scraping/conexao.py`, `gravacao.py`),
+  desacoplados de `crud/avaliacoes.py` e de qualquer módulo do backend —
+  simula um job de scraping rodando fora do codebase da aplicação
+  principal, a pedido do autor.
+- [x] **Site de avaliações fixture implementado**
+  (`src/scraping/fixtures/reviews/`): 200 avaliações sintéticas, 5
+  páginas de listagem com resumo de distribuição por estrela e
+  paginação numerada (não um link solto de "próxima"), 200 páginas de
+  detalhe. **Template único** — todas as páginas de detalhe têm
+  exatamente a mesma estrutura HTML; a única seção condicional
+  (resolvido/voltaria) aparece ou não dependendo do dado (`respondido`),
+  não de uma variação de template. Essa restrição foi uma correção
+  explícita do autor sobre uma proposta inicial da IA, que sugeria
+  templates inconsistentes entre páginas (elemento decoy oculto, atributo
+  de nota ausente em parte dos casos, bloco de metadados em `<dl>`
+  alternando com `<div>`) — rejeitada por tornar o site não uniforme.
+  - Conteúdo sintético realista e proposital: ~10% dos comentários com
+    erro de português + palavrão censurado, ~20% com emojis (dificulta a
+    análise de sentimento da futura Fase 8 de propósito), correlacionados
+    com o sentimento da nota (positiva/neutra/negativa).
+  - Reações (👍 útil / 👎 não útil, toggle via JS — corrigido um bug em
+    que o clique somava indefinidamente em vez de alternar).
+  - Indicador "respondido pela empresa" em ~85% das avaliações; só
+    quando respondido, os campos "problema resolvido" e "voltaria a
+    fazer negócio" aparecem, correlacionados com a nota. Ver ADR-012
+    sobre por que esses campos extras não são extraídos pelo scraper.
+  - Gerador reprodutível (mesmo racional do `generate_seed_dev.py`, seed
+    fixo): `src/scraping/fixtures/gerar_fixtures_scraping.py`.
+  - `main.py` atualizado com novo mount
+    `app.mount("/fixtures/reviews", StaticFiles(...))`, servindo o site
+    como HTTP real — necessário para o scraper fazer requisição de
+    verdade, não leitura de arquivo local (ADR-010). Teste manual:
+    `http://127.0.0.1:8000/fixtures/reviews/pagina_01.html`.
+  - `requirements.txt`: `beautifulsoup4==4.15.0` adicionado.
+- [ ] Redesenhar `coletor.py`/`parser.py`/`tratamento.py` para navegar
+  listagem → detalhe → paginação numerada e tratar o bloco condicional
+  de resolvido/voltaria (próximo passo, ainda não iniciado)
 - [ ] Validar contagens Bronze vs. Postgres (conferência pontual)
 - [ ] Planejar Silver: padronização, limpeza, enriquecimento, análise de
   sentimento (Formulário Web e Scraping, únicas origens com comentário)

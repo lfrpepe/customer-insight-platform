@@ -24,8 +24,7 @@ evolutiva (permite crescer em funcionalidades sem reestruturação).
 | Backend / Cadastro | FastAPI | Cadastro de avaliações com validações — apenas *Create* (ver [ADR 006](docs/decisions/006-fastapi-em-vez-de-flask.md)); rotas protegidas por API Key (ver [ADR 007](docs/decisions/007-autenticacao-api-key.md)) |
 | Ingestão | Web Scraping + Pinpad + Totem + Telemarketing + APIs Públicas | Múltiplas fontes de dados, com níveis de estrutura diferentes |
 | BI | Power BI | Dashboards executivos sobre a camada Gold |
-| Versionamento | GitHub | Código e documentação versionados |
-| CI | GitHub Actions | Lint e testes automatizados do backend (ver ADR-009 — orquestração de dados usa Databricks Jobs, não GitHub Actions) |
+| Versionamento | GitHub + GitHub Actions | Código, documentação, automação |
 
 ## Fontes de avaliação
 
@@ -42,6 +41,13 @@ de lidar com dado estruturado e não estruturado ao mesmo tempo:
 | Web Scraping | ❌ | ❌ | ✅ |
 
 Detalhamento em [`docs/data_model_relational.md`](docs/data_model_relational.md).
+
+A origem Scraping roda contra um site de avaliações **simulado** (páginas HTML
+fixture versionadas no repositório), não contra um site real — por
+conformidade legal (Termos de Uso + LGPD), não limitação técnica. Ver
+[ADR 010](docs/decisions/010-scraping-fonte-simulada.md),
+[ADR 011](docs/decisions/011-scraper-gravacao-propria-desacoplada.md) e
+[ADR 012](docs/decisions/012-campos-nao-extraidos-scraping.md).
 
 ## Arquitetura
 
@@ -73,7 +79,13 @@ src/
 ├── security/     autenticação via API Key (ver ADR-007)
 ├── validators/   regras de negócio que o Pydantic não cobre (CPF, telefone)
 ├── templates/    telas HTML (Jinja2) — Formulário Web, Pinpad, Totem, simulador de Telemarketing
-└── static/       CSS compartilhado pelas telas
+├── static/       CSS/JS compartilhado pelas telas do backend
+└── scraping/     scraper desacoplado do backend (ver ADR-011)
+    ├── conexao.py, coletor.py, parser.py, tratamento.py, gravacao.py
+    ├── executar_scraping.py     entry point
+    └── fixtures/
+        ├── gerar_fixtures_scraping.py   gerador reprodutível do site simulado
+        └── reviews/                      site de avaliações fixture (servido via StaticFiles)
 docs/           documentação técnica e decisões de arquitetura (ADRs)
 notebooks/      notebooks de exploração e ETL (Databricks)
 tests/          testes automatizados
@@ -102,6 +114,8 @@ uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 
 - Docs interativas (Swagger): `/docs`
 - Telas HTML: `/formulario-web`, `/pinpad`, `/totem`, `/telemarketing-simulador`
+- Site de avaliações fixture (fonte simulada de Scraping):
+  `/fixtures/reviews/pagina_01.html`
 
 **Nota:** conexão direta ao banco (porta 5432) pode ser bloqueada por redes
 corporativas restritivas — nesse caso, use

@@ -36,6 +36,7 @@ app = FastAPI(
 )
 
 app.mount("/static", StaticFiles(directory=os.path.join(_SRC_DIR, "static")), name="static")
+app.mount("/fixtures/reviews", StaticFiles(directory=os.path.join(_SRC_DIR, "scraping", "fixtures", "reviews")), name="fixtures-reviews",)
 
 # Autenticação aplicada a todas as rotas de Create, de uma vez, em vez de
 # repetir Depends(verificar_api_key) em cada um dos 4 routers (ver ADR-007).
