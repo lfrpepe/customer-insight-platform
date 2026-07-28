@@ -211,6 +211,21 @@ implementação, engenharia de dados e documentação.
   não apenas ao final de cada fase, mas incrementalmente, à medida que cada
   discussão técnica gerava uma mudança real no schema ou na estratégia.
 
+- **Debugging da primeira execução real do Job de ingestão Bronze** — as
+  6 tabelas quase carregaram na primeira tentativa; `avaliacoes` falhou
+  na etapa final (atualização do watermark), com erro
+  `DATATYPE_MISMATCH.CAST_WITHOUT_SUGGESTION` do Spark Connect. A IA
+  diagnosticou a causa (inferência de schema falhando ao converter um
+  `Row` Python com `datetime` no ambiente serverless, resultando num
+  `STRUCT<>` vazio) e corrigiu declarando o schema explicitamente. Antes
+  da correção, também foi sinalizado o risco de duplicação: como a
+  gravação em `bronze.avaliacoes` já havia sido feita antes do erro, uma
+  reexecução sem `TRUNCATE` prévio duplicaria as linhas — o autor limpou
+  a tabela antes de rodar novamente, confirmando o resultado correto.
+  Aproveitado o mesmo ajuste para separar, no resumo da execução, "dados
+  carregados" de "watermark não persistido", evitando reportar `0
+  linhas` quando a carga real havia funcionado.
+
 ## O que não foi delegado
 
 Todas as decisões arquiteturais foram avaliadas e compreendidas antes de serem

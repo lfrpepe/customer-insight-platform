@@ -328,10 +328,25 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
   (manual) nesta fase — decisão que revisa a orquestração original da
   Fase 1 (GitHub Actions), que passa a ser usado apenas para CI — ver
   ADR-009
-- [ ] Criar schema `bronze` e tabela `bronze.controle_ingestao` no Databricks
-- [ ] Implementar script/notebook de ingestão (um por tabela, reaproveitando
-  conexão `pg8000`)
-- [ ] Configurar Job no Databricks (execução manual) para disparar a
-  ingestão
+- [x] Schema `bronze` e tabela `bronze.controle_ingestao` criados no
+  Databricks (`src/database/scripts/criar_schema_bronze.sql`)
+- [x] Script de ingestão implementado (`src/etl/bronze/`), um módulo por
+  responsabilidade (conexão, extração, controle de watermark, carga),
+  reaproveitando `pg8000` já validado no backend
+- [x] Job configurado no Databricks (execução manual) e ingestão validada
+  com sucesso: `estados`, `cidades`, `categorias`, `origens_avaliacao`,
+  `clientes` (full) e `avaliacoes` (incremental) todas carregadas em
+  `bronze.*`
+- [x] **Bug corrigido:** primeira execução carregou as 6 tabelas, mas a
+  atualização do watermark de `avaliacoes` falhou
+  (`DATATYPE_MISMATCH.CAST_WITHOUT_SUGGESTION`, Row Python com `datetime`
+  inferido incorretamente pelo Spark Connect do ambiente serverless,
+  virando um `STRUCT<>` vazio). Corrigido declarando o schema
+  explicitamente (`StringType`/`TimestampType`) em vez de depender de
+  inferência automática — ver `src/etl/bronze/controle.py`. Também
+  ajustado o resumo da execução para não reportar "0 linhas" quando os
+  dados já tinham sido gravados e só o watermark falhou (evita mascarar
+  sucesso parcial como falha total).
+- [ ] Validar contagens Bronze vs. Postgres (conferência pontual)
 - [ ] Planejar Silver: padronização, limpeza, enriquecimento, análise de
   sentimento (Formulário Web e Scraping, únicas origens com comentário)
