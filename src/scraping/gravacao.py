@@ -43,9 +43,10 @@ def inserir_avaliacao_scraping(
 
     id_cliente e id_categoria ficam NULL — a origem Scraping não produz
     esses dados (ver tabela "Preenchimento por origem" em
-    data_model_relational.md). natureza_registro é sempre 'Sintético'
-    nesta fase (ADR-010: a fonte é simulada, ainda que o mecanismo de
-    coleta seja real).
+    data_model_relational.md). natureza_registro é 'Real' — o scraper é
+    um sistema de captura de produção genuíno, igual a Formulário
+    Web/Pinpad/Totem (ver ADR-003 e ADR-013; revisa o que o ADR-010
+    havia registrado sobre este campo especificamente).
     """
     cursor = conn.cursor()
     cursor.execute(
@@ -53,7 +54,7 @@ def inserir_avaliacao_scraping(
         INSERT INTO avaliacoes
             (id_cliente, id_categoria, id_origem, data_avaliacao, nota, comentario, natureza_registro)
         VALUES
-            (NULL, NULL, %s, %s, %s, %s, 'Sintético')
+            (NULL, NULL, %s, %s, %s, %s, 'Real')
         """,
         (id_origem, data_avaliacao, nota, comentario),
     )
@@ -71,7 +72,7 @@ def gravar_lote(conn: Connection, avaliacoes: list[dict]) -> int:
     o lote anterior antes:
         DELETE FROM avaliacoes
         WHERE id_origem = (SELECT id_origem FROM origens_avaliacao WHERE nome = 'Scraping')
-          AND natureza_registro = 'Sintético';
+          AND natureza_registro = 'Real';
     """
     id_origem = obter_id_origem_scraping(conn)
     for item in avaliacoes:
