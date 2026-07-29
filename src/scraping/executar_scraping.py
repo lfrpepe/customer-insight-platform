@@ -10,7 +10,7 @@ Pré-requisitos:
 - Rodar em GitHub Codespaces: o script conecta diretamente ao Supabase
   (porta 5432), bloqueada na rede corporativa do autor (ver status.md).
 """
-from src.scraping.coletor import coletar_todas_paginas
+from src.scraping.coletor import coletar_htmls_detalhe
 from src.scraping.conexao import obter_conexao
 from src.scraping.gravacao import gravar_lote
 from src.scraping.parser import extrair_avaliacoes
@@ -19,10 +19,10 @@ from src.scraping.tratamento import tratar_lote
 
 def main() -> None:
     print("Coletando páginas via HTTP...")
-    paginas_html = coletar_todas_paginas()
-    print(f"{len(paginas_html)} página(s) coletada(s).")
+    htmls_detalhe = coletar_htmls_detalhe()
+    print(f"{len(htmls_detalhe)} avaliação(ões) coletada(s).")
 
-    brutas = [item for html in paginas_html for item in extrair_avaliacoes(html)]
+    brutas = extrair_avaliacoes(htmls_detalhe)
     print(f"{len(brutas)} avaliação(ões) extraída(s).")
 
     validas, descartadas = tratar_lote(brutas)

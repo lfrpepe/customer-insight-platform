@@ -25,10 +25,10 @@ load_dotenv()
 def obter_conexao() -> pg8000.Connection:
     """Abre uma conexão isolada com o Supabase via Session Pooler (porta 5432)."""
     return pg8000.connect(
-        user=os.environ["DB_USER"],
-        password=os.environ["DB_PASSWORD"],
-        host=os.environ["DB_HOST"],
-        port=int(os.environ.get("DB_PORT", 5432)),
-        database=os.environ.get("DB_NAME", "postgres"),
+        user=os.environ["SUPABASE_DB_USER"],
+        password=os.environ["SUPABASE_DB_PASSWORD"],
+        host=os.environ["SUPABASE_DB_HOST"],
+        port=int(os.environ.get("SUPABASE_DB_PORT", 5432)),
+        database=os.environ.get("SUPABASE_DB_NAME", "postgres"),
         timeout=10,
     )
