@@ -287,6 +287,45 @@ implementação, engenharia de dados e documentação.
   (`gerar_fixtures_scraping.py`) e no mount do `main.py`
   (`StaticFiles(directory=...)`) — sem mudança na URL pública, já que o
   prefixo de rota é independente do nome da pasta no disco.
+- **Reescrita de `coletor.py`/`parser.py`/`tratamento.py` para o site
+  final e validação ponta a ponta em produção** — a primeira versão
+  desses módulos foi escrita antes do redesenho do site (listagem
+  simples, um único nível). Reescritos para: (1) navegar em 2 níveis
+  (listagem numerada → página de detalhe, já que o comentário na
+  listagem vem truncado); (2) extrair também nome, respondido, resolvido
+  e voltaria (a pedido do autor, para permitir análise de sentimento
+  mais completa); (3) extrair a data via regex sobre o texto misturado
+  com cidade/estado, já que o site fixture não tem atributo `data-*`
+  limpo para data. URL do servidor passou a vir de `URL_SERVIDOR` no
+  `.env` (a pedido do autor), necessário porque a URL pública muda a
+  cada sessão do Codespaces. Testado em duas etapas, a pedido do autor:
+  primeiro só extração + tratamento, sem gravar (`testar_extracao.py`),
+  e só depois de aprovada a estrutura, ligado à gravação real
+  (`executar_scraping.py`) — resultado: 200 avaliações coletadas,
+  tratadas e gravadas em `avaliacoes`, confirmado por query no Supabase.
+- **Sessão de debugging de infraestrutura do Codespaces (não é bug de
+  código)** — o autor reportou o servidor "não abrindo mais" após
+  funcionar antes. Diagnóstico passo a passo: (1) confirmado via log que
+  o `uvicorn` subia normal, sem erro; (2) `curl` de dentro do Codespaces
+  respondeu 200 tanto na rota `/` quanto em `/fixtures/reviews/...`,
+  isolando o problema como externo ao servidor; (3) identificado que o
+  primeiro `uvicorn --reload` (sem `--host 0.0.0.0`) escutava só em
+  loopback, inacessível pelo túnel público do Codespaces; (4) após
+  corrigir o host, um 404 persistente foi isolado como visibilidade de
+  porta "Private" no Codespaces, não bug de aplicação; (5) por fim, o
+  `coletor.py` retornando 0 avaliações foi diagnosticado como
+  `URL_SERVIDOR` apontando para a URL pública (sujeita a bloqueios da
+  rede corporativa do autor) em vez de `localhost` — como o script roda
+  na mesma máquina que o servidor, `localhost` resolve sem depender do
+  túnel/rede externa.
+- **Correção de `natureza_registro` do scraper (ADR-013)** — o autor
+  pediu explicitamente `natureza_registro = 'Real'` na gravação. A IA
+  identificou que isso na verdade realinha com a definição original do
+  ADR-003 (que já classificava "Scraper" como sistema de produção real),
+  corrigindo uma inconsistência introduzida depois pelo ADR-010 (que
+  registrara `'Sintético'` para esse campo especificamente, confundindo
+  "fonte simulada" com "dado sintético"). Registrado como ADR-013, sem
+  reescrever o conteúdo do ADR-010 (imutável), só apontando a revisão.
 
 ## O que não foi delegado
 

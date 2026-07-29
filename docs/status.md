@@ -78,6 +78,10 @@ do Repositório), 4 (Banco de Dados), 5 (Backend)
   resolvido, voltaria) não são extraídos pelo scraper — fora do escopo do
   schema atual de `avaliacoes` (ADR-002); tratados como ruído estrutural
   proposital, não como dado a capturar.
+- **ADR 013** — `natureza_registro` do scraper corrigido para `'Real'`,
+  alinhando com a definição original do ADR-003 (que já classificava
+  Scraper como sistema de produção real); revisa pontualmente o que o
+  ADR-010 havia registrado sobre esse campo especificamente.
 
 ## Decisões de ambiente (não formalizadas como ADR, mas relevantes)
 
@@ -399,9 +403,23 @@ recorrentemente insatisfeitos etc.). Aplica-se às origens `Formulário Web` e `
     verdade, não leitura de arquivo local (ADR-010). Teste manual:
     `http://127.0.0.1:8000/fixtures/reviews/pagina_01.html`.
   - `requirements.txt`: `beautifulsoup4==4.15.0` adicionado.
-- [ ] Redesenhar `coletor.py`/`parser.py`/`tratamento.py` para navegar
+- [x] **Scraper reescrito e validado ponta a ponta em produção**
+  (`coletor.py`, `parser.py`, `tratamento.py`, `gravacao.py`,
+  `executar_scraping.py`): navegação em 2 níveis (listagem numerada →
+  página de detalhe), extração de nome, data (via regex, sem atributo
+  `data-*` limpo no site fixture), nota, comentário, respondido,
+  resolvido e voltaria; `id_origem` resolvido dinamicamente (ADR-011);
+  `id_cliente`/`id_categoria` gravados como `NULL`. Testado antes sem
+  gravar no banco (`testar_extracao.py`), depois rodado de verdade
+  (`executar_scraping.py`) — **200 avaliações coletadas, tratadas e
+  gravadas em `avaliacoes`, confirmadas via query no Supabase**.
+- [x] **Correção de `natureza_registro` (ADR-013):** scraper passou a
+  gravar `'Real'` em vez de `'Sintético'` — o ADR-003 já classificava
+  Scraper como sistema de produção real; o ADR-010 havia introduzido uma
+  inconsistência nesse ponto específico, agora corrigida.
+- [x] Redesenhar `coletor.py`/`parser.py`/`tratamento.py` para navegar
   listagem → detalhe → paginação numerada e tratar o bloco condicional
-  de resolvido/voltaria (próximo passo, ainda não iniciado)
+  de resolvido/voltaria
 - [ ] Validar contagens Bronze vs. Postgres (conferência pontual)
 - [ ] Planejar Silver: padronização, limpeza, enriquecimento, análise de
   sentimento (Formulário Web e Scraping, únicas origens com comentário)
